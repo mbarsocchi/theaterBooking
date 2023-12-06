@@ -1,12 +1,12 @@
 <?php if (count($allBookings)) { ?>
-    <form name="insertBooking" method="post" onsubmit="return sub(<?php echo $index; ?>)" >
+    <form name="insertBooking" method="post" onsubmit="return validateAddBooking()" >
         <select name="showId">";
             <?php foreach ($allBookings as $day => $bookingData) { ?>
             <option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title']. ". ".$bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
             <?php } ?>
         </select><br />
         <input type="hidden" name="f" value="b"/>
-        <input type="text" name="name" size="35"/><br />
+        <input type="text" name="name" size="35" autofocus/><br />
         <?php if ($isAdmin) { ?>
             Inserisci come: <select name="user">";
             <?php foreach ($usersInScope as $user) {

@@ -1,9 +1,16 @@
-function sub(index) {
-    var x = document.forms["insertBooking"]["name"].value;
-    if (x == null || x == "") {
+function validateAddBooking() {
+    var nameOfViewer = document.forms["insertBooking"]["name"].value;
+    if (nameOfViewer == null || nameOfViewer == "") {
         alert("Inserisci un nome");
         return false;
     }
+    if (/\d/.test(nameOfViewer)){
+        alert("Non possono esserci numeri nel nome della prenotazione.\n\
+se stai cercando di prenotare più persone con lo stesso nome (esmpio Marco x 2) devi scrivere due volte Marco\n\
+altrimenti non è possibile fare il conto dei posti liberi e di quelli occupati.");
+        return false;
+    }
+   
 }
 
 function validateAddUser() {
