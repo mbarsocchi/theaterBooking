@@ -18,7 +18,7 @@
             }?>
             </select>
         <?php } else { ?>
-            <input type="hidden" name="user" value="<?php echo $user['id']; ?>">
+            <input type="hidden" name="user" value="<?php echo $thisUserId; ?>">
         <?php } ?><br />
         <input type="submit" value="Inserisci prenotazione" />    
     </form>
