@@ -1,14 +1,14 @@
 <?php if (count($allBookings)) { ?>
     <form name="insertBooking" method="post" onsubmit="return validateAddBooking()" >
-        <select name="showId">";
+        <select name="showId" style="margin-bottom: 20px;width:100%">
             <?php foreach ($allBookings as $day => $bookingData) { ?>
             <option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title']. ". ".$bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
             <?php } ?>
         </select><br />
         <input type="hidden" name="f" value="b"/>
-        <input type="text" name="name" size="35" autofocus/><br />
+        <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%"/><br />
         <?php if ($isAdmin) { ?>
-            Inserisci come: <select name="user">";
+            Inserisci come: <select name="user" style="margin-bottom: 20px;">";
             <?php foreach ($usersInScope as $user) {
                 if (strcasecmp($thisUserId, trim($user['id'])) == 0) { ?>
                     <option selected="selected" value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
@@ -20,10 +20,9 @@
         <?php } else { ?>
             <input type="hidden" name="user" value="<?php echo $thisUserId; ?>">
         <?php } ?><br />
-        <input type="submit" value="Inserisci prenotazione" />    
+        <input type="submit" value="Inserisci prenotazione" style="margin-bottom: 20px;width:100%"/>    
     </form>
     <?php foreach ($allBookings as $day => $bookingData) { ?>
-    </br></br>
        <table border="1" style="border:1px black;border-collapse:collapse;">
        <tr class="tableHeader">
             <td colspan="3"><?php echo $bookingData['title']. ". ".$bookingData['dayOfTheWeek'] . " " . $day; ?><br />
@@ -53,6 +52,7 @@
         </table>
     <?php } ?>
 <?php } ?>
+<br/><br/>
 <?php if ($isAdmin) { ?>
     <a href="admin.php">Gestisci spettacoli</a>
 <?php } ?>
