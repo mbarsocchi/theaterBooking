@@ -57,5 +57,8 @@ CREATE TABLE `auth_tokens` (
     `token` char(64),
     `userid` integer(11) not null,
     `expires` datetime,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+  FOREIGN KEY (`userid`)
+        REFERENCES users (id)
+        ON DELETE CASCADE
 );

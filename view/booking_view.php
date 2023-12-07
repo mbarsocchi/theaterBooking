@@ -6,7 +6,8 @@
             <?php } ?>
         </select><br />
         <input type="hidden" name="f" value="b"/>
-        <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%"/><br />
+        <div class="spacer"/>
+        <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome della persona da prenotare"/><br />
         <?php if ($isAdmin) { ?>
             Inserisci come: <select name="user" style="margin-bottom: 20px;">";
             <?php foreach ($usersInScope as $user) {
@@ -22,6 +23,7 @@
         <?php } ?><br />
         <input type="submit" value="Inserisci prenotazione" style="margin-bottom: 20px;width:100%"/>    
     </form>
+<div class="spacer"/>
     <?php foreach ($allBookings as $day => $bookingData) { ?>
        <table border="1" style="border:1px black;border-collapse:collapse;">
        <tr class="tableHeader">
