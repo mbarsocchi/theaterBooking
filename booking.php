@@ -5,6 +5,7 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'S
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Database.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Booking.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 
 define('UNIQUE_TICKET_COST', 11);
 define('STOP_PRENO_HOUR', 19000);
@@ -15,14 +16,13 @@ echo $head->render();
 $db = new Database();
 $shows = new Shows($db);
 $booking = new Booking($db);
-if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, 'f'), array('b','db','ub'))) {
-    $booking->handleBooking();
-}
-
+$login = new Login($db);
 $users = new Users($db);
-session_start();
-if (!isset($_SESSION['session_user']) || $_SESSION['session_user'] == null || $_SESSION['session_user'] == "") {
-    header('location: index.php');
+
+$login->isAuth(false);
+
+if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, 'f'), array('b', 'db', 'ub'))) {
+    $booking->handleBooking();
 }
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);

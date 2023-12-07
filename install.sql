@@ -50,3 +50,12 @@ CREATE TABLE `users_shows` (
         REFERENCES users (id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `auth_tokens` (
+    `id` integer(11) not null AUTO_INCREMENT,
+    `selector` char(12),
+    `token` char(64),
+    `userid` integer(11) not null,
+    `expires` datetime,
+    PRIMARY KEY (`id`)
+);

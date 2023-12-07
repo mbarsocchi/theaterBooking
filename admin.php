@@ -4,17 +4,17 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'R
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Database.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
+
 
 $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_head.php');
 echo $head->render();
 $db = new Database();
 $shows = new Shows($db);
+$login = new Login($db);
 $users = new Users($db);
-session_start();
-if (!isset($_SESSION['session_user']) || $_SESSION['session_user'] == null || $_SESSION['session_user'] == "") {
-    header('location: index.php');
-}
 
+$login->isAuth();
 
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 if ($thisUser != null && $thisUser['access_level'] === 0) {

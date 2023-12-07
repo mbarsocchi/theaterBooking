@@ -12,6 +12,9 @@
         <div class="foc">
             <input type="password" name="password" class="form-control"  placeholder="Password" autocomplete="off" value= "" >
         </div>
+        <div class="foc-left" >
+            <input type="checkbox" name="remember" class="checkbox" checked> Ricordami
+        </div>
         <div class="foc" >
             <button type="submit" class="btn btn-block">Login</button>
         </div>

@@ -8,11 +8,12 @@ $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SE
 echo $head->render();
 
 $db = new Database();
-
 $login = new Login($db);
 
+$login->isAuth(false);
+
 $login->handleLogin();
-        
+
 $lv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'login_view.php');
 echo $lv->render();
 

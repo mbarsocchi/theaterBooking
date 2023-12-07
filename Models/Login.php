@@ -11,7 +11,7 @@ class Login {
 
     function handleLogin() {
 
-        session_start();
+        @session_start();
 
         if (isset($_SESSION['session_id'])) {
             header('Location: booking.php');
@@ -25,14 +25,14 @@ class Login {
             if (empty($username) || empty($password)) {
                 $msg = 'Inserisci username e password %s';
             } else {
-                $userName = $this->getUserId($username, $password);
-                if ($userName == null) {
+                $user = $this->getUser($username, $password);
+                if ($user == null) {
                     $msg = 'Credenziali utente errate %s';
                 } else {
-                    session_regenerate_id();
-                    $_SESSION['session_id'] = session_id();
-                    $_SESSION['session_user'] = $userName;
-
+                    $this->setSessionValues($user['name']);
+                    if (filter_input(INPUT_POST, 'remember') != null && filter_input(INPUT_POST, 'remember') == 'on') {
+                        $this->remember($user['id']);
+                    }
                     header('Location: booking.php');
                     exit;
                 }
@@ -40,8 +40,88 @@ class Login {
         }
     }
 
-    private function getUserId($username, $password) {
-        $stmt = $this->db->getConnection()->prepare("SELECT user_login "
+    private function setSessionValues($userName) {
+        session_regenerate_id();
+        $_SESSION['session_id'] = session_id();
+        $_SESSION['session_user'] = $userName;
+    }
+
+    private function remember($id) {
+        $selector = base64_encode(random_bytes(9));
+        $authenticator = random_bytes(33);
+        $expireTimestamp = time() + 864000;
+        setcookie(
+                'remember',
+                $selector . ':' . base64_encode($authenticator),
+                $expireTimestamp,
+                '/',
+                '',
+                true,
+                true
+        );
+        $stmt = $this->db->getConnection()->prepare("INSERT INTO "
+                . "auth_tokens (selector, token, userid, expires) "
+                . "VALUES (?, ?, ?, ?)");
+        $token = hash('sha256', $authenticator);
+        $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
+        $stmt->bind_param("ssis", $selector, $token, $id, $expires);
+        $stmt->execute();
+    }
+
+    private function updateSession($id) {
+        $expireTimestamp = time() + 864000;
+        $stmt = $this->db->getConnection()->prepare("UPDATE "
+                . "auth_tokens "
+                . "SET expires = ? "
+                . "WHERE userid = ?");
+        $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
+        $stmt->bind_param("si", $id, $expires);
+        $stmt->execute();
+        $currentCookieValue = $_COOKIE['remember'];
+        setcookie(
+                'remember',
+                $currentCookieValue,
+                $expireTimestamp,
+                '/',
+                '',
+                true,
+                true
+        );
+    }
+
+    private function canReAuthOnPageLoad($selector, $authenticator) {
+        $stmt = $this->db->getConnection()->prepare("SELECT at.*, u.user_login, u.id "
+                . "FROM auth_tokens at "
+                . "JOIN users u ON at.userid = u.id "
+                . "WHERE selector = ?");
+        $stmt->bind_param("s", $selector);
+        $stmt->execute();
+        $authTokenArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        if (!count($authTokenArray) && isset($_COOKIE['remember'])) {
+            $his->exit();
+        } else {
+            foreach ($authTokenArray as $authSess) {
+                if (hash_equals($authSess['token'], hash('sha256', base64_decode($authenticator)))) {
+                    $this->setSessionValues($authSess['user_login']);
+                    $this->updateSession($authSess['id']);
+                }
+            }
+        }
+    }
+
+    public function isAuth($redirect = true) {
+        @session_start();
+        if (!empty($_COOKIE['remember'])) {
+            list($selector, $authenticator) = explode(':', $_COOKIE['remember']);
+            $this->canReAuthOnPageLoad($selector, $authenticator);
+        }
+        if ($redirect && (!isset($_SESSION['session_user']) || $_SESSION['session_user'] == null || $_SESSION['session_user'] == "")) {
+            header('location: index.php');
+        }
+    }
+
+    private function getUser($username, $password) {
+        $stmt = $this->db->getConnection()->prepare("SELECT id,user_login "
                 . "FROM users WHERE "
                 . "user_login = ? "
                 . "AND password = ? ");
@@ -52,10 +132,28 @@ class Login {
         $stmt->execute();
         $result = null;
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $user) {
-            $result = $user['user_login'];
+            $result['id'] = $user['id'];
+            $result['name'] = $user['user_login'];
         }
         $stmt->free_result();
         return $result;
+    }
+
+    public function exit() {
+        session_start();
+        session_destroy();
+        if (!empty($_COOKIE['remember'])) {
+            list($selector, $authenticator) = explode(':', $_COOKIE['remember']);
+            unset($_COOKIE['remember']);
+            setcookie('remember', '', -1, '/');
+            $stmt = $this->db->getConnection()->prepare("DELETE "
+                    . "FROM auth_tokens "
+                    . "WHERE selector = ?");
+            $stmt->bind_param("s", $selector);
+            $stmt->execute();
+        }
+        header('Location: index.php');
+        exit;
     }
 
 }
