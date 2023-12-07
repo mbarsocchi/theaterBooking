@@ -107,6 +107,13 @@ class Login {
                 }
             }
         }
+        $expireTimestamp = time();
+        $stmt = $this->db->getConnection()->prepare("DELETE "
+                . "FROM auth_tokens "
+                . "WHERE expires < ? "
+                . "LIMIT 5");
+        $stmt->bind_param("s", $expireTimestamp);
+        $stmt->execute();
     }
 
     public function isAuth($redirect = true) {

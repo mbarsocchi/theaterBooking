@@ -27,8 +27,7 @@ td {
 tr {
     height: 40px;
 }
-.foc-left {
-    margin:40px 10px;
+.left {
     position: relative;
     left: 0px;
     height: 80px;
@@ -55,7 +54,7 @@ select {
     font-size: 28px;
 }
 .foc{
-    margin:40px 10px;
+    margin:100px 10px;
 }
 .form-control {
     width: 100%;
@@ -76,5 +75,10 @@ select {
 }
 .btn:hover{
     background:#FF0000;
+}
+.no-right-brd{
+    border-right-width: 0px;
+    border-right-style: hidden;
+    border-right-color: rgb(255, 255, 255);
 
 }
