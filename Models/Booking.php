@@ -21,6 +21,7 @@ class Booking {
             case 'ub':
                 break;
         }
+        header('Location: booking.php');
     }
 
     function updatePrenoWithGeneratedCode($id, $rifUserId, $code) {
@@ -100,7 +101,6 @@ class Booking {
             $bookingData[$dateFormatted]['occupiedSeats'] = isset($temp[$dateFormatted]) ? count($temp[$dateFormatted]['bookings']) : 0;
             $bookingData[$dateFormatted]['freeSeats'] = $show['posti'] - $bookingData[$dateFormatted]['occupiedSeats'];
             $bookingData[$dateFormatted]['bookings'] = isset($temp[$dateFormatted]['bookings']) ? $temp[$dateFormatted]['bookings'] : array();
-            
         }
         return $bookingData;
     }

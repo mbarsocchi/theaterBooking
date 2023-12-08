@@ -7,7 +7,9 @@
                     ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
                 <?php } ?></select><br />
             <div class="spacer"/>
-        <?php } ?>
+        <?php } else{?>
+            <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
+        <?php }?>
         <input type="hidden" name="f" value="b"/>
         <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome e cognome"/><br />
         <?php if ($isAdmin) { ?>

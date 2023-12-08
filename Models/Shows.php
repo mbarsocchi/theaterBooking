@@ -25,6 +25,7 @@ class Shows {
             default:
                 break;
         }
+        header('Location: admin.php');
         return $r;
     }
 
