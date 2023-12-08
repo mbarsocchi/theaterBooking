@@ -4,13 +4,16 @@ function validateAddBooking() {
         alert("Inserisci un nome");
         return false;
     }
-    if (/\d/.test(nameOfViewer)){
+    if (/\d/.test(nameOfViewer)) {
         alert("Non possono esserci numeri nel nome della prenotazione.\n\
 se stai cercando di prenotare più persone con lo stesso nome (esmpio Marco x 2) devi scrivere due volte Marco\n\
 altrimenti non è possibile fare il conto dei posti liberi e di quelli occupati.");
         return false;
     }
-   
+}
+
+function confirmDeleteBooking() {
+    return confirm("Sei sicuro di voler cancellare questa prenotazione?");
 }
 
 function validateAddUser() {
@@ -76,8 +79,8 @@ function subAddShow() {
 
 }
 
-function deleteShows($id){
-    if($('input:checkbox:checked[id^="show_'+$id+'"]').length != 0){
+function deleteShows($id) {
+    if ($('input:checkbox:checked[id^="show_' + $id + '"]').length != 0) {
         alert("Non puoi cancellare uno show senza prima cancellare tutti gli utenti associati");
         return false;
     }
