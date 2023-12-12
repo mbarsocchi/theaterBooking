@@ -98,7 +98,7 @@ class Login {
         $stmt->execute();
         $authTokenArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         if (!count($authTokenArray) && isset($_COOKIE['remember'])) {
-            $his->exit();
+            $this->exit();
         } else {
             foreach ($authTokenArray as $authSess) {
                 if (hash_equals($authSess['token'], hash('sha256', base64_decode($authenticator)))) {

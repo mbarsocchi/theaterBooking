@@ -171,4 +171,3 @@ Ciao <?php echo $userName; ?><br/><br/>
     ?>
     Devi prima creare uno spettacolo
 <?php } ?>
-<a href="index.php">Prenotazioni</a>

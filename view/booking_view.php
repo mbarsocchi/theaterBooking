@@ -60,6 +60,3 @@
     <?php } ?>
 <?php } ?>
 <br/><br/>
-<?php if ($isAdmin) { ?>
-    <a href="admin.php">Gestisci spettacoli</a>
-<?php } ?>

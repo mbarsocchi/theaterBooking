@@ -7,11 +7,7 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'D
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Booking.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 
-define('UNIQUE_TICKET_COST', 11);
-define('STOP_PRENO_HOUR', 19000);
 
-$head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_head.php');
-echo $head->render();
 
 $db = new Database();
 $shows = new Shows($db);
@@ -37,8 +33,12 @@ $data['allBookings'] = array();
 if (count($futureShows)) {
     $data['allBookings'] = $booking->getBookings($shows->retriveAllfutureShow($thisUser['id']));
 }
+$loginData['isLogged'] = true;
+$loginData['isAdmin'] = $data['isAdmin'];
+$loginData['thispage'] = "booking";
+$head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php',$loginData);
+echo $head->render();
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'booking_view.php', $data);
 echo $tmpl->render();
-echo '<a href="logout.php">esci</a>';
 $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php');
 echo $foot->render();
