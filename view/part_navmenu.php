@@ -16,5 +16,5 @@
             <li><a href="logout.php">Esci</a></li>
         </ul>
     </section>
-    <div class="mid-spacer"/>
+<div class="mid-spacer"></div>
 <?php } ?>

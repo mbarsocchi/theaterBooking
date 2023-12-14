@@ -25,7 +25,7 @@
     <?php } else { ?><input type="hidden" name="user" value="<?php echo $thisUserId; ?>"><?php } ?><br />
         <input type="submit" value="Inserisci prenotazione" style="margin-bottom: 20px;width:100%"/>    
     </form>
-    <div class="spacer"/>
+<div class="spacer"></div>
     <?php foreach ($allBookings as $day => $bookingData) { ?>
         <table border="1" style="border:1px black;border-collapse:collapse;">
             <tr class="tableHeader">
