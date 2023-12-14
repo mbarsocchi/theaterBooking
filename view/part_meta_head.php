@@ -1,4 +1,4 @@
-<?php echo $version="1.0"; ?>
+<?php $version="1.0"; ?>
 <!DOCTYPE html>
 <html>
     <head>
