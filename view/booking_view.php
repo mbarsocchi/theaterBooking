@@ -57,6 +57,6 @@
                 </tr>
         <?php } ?>
         </table>
+        <br/><br/>
     <?php } ?>
 <?php } ?>
-<br/><br/>

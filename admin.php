@@ -39,8 +39,14 @@ $data['thisUserId'] = $thisUser['id'];
 $data['usersInScope'] = $users->getUsersInScope($thisUser['id']);
 $data['showUserMap'] = $shows->getShowInUserScope($data['usersInScope']);
 $data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
-$tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $data);
-echo $tmpl->render();
 
+$loginData['isLogged'] = true;
+$loginData['isAdmin'] = $data['isAdmin'];
+$loginData['thispage'] = "admin";
+
+$tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
+echo $tmpl->render();
+$content = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'admin_view.php', $data);
+echo $content->render();
 $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php');
 echo $foot->render();

@@ -3,3 +3,5 @@ config.php
 nbproject/
 Print.php
 plugin.php
+composer.json
+composer.lock
