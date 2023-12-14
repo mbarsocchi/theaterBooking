@@ -3,17 +3,15 @@
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'RenderTemplate.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Database.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Booking.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 
 
 
-$db = new Database();
-$shows = new Shows($db);
-$booking = new Booking($db);
-$login = new Login($db);
-$users = new Users($db);
+$shows = new Shows();
+$booking = new Booking();
+$login = new Login();
+$users = new Users();
 
 $login->isAuth(false);
 

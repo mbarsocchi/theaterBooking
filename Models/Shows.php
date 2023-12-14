@@ -6,8 +6,8 @@ class Shows {
 
     private $db;
 
-    public function __construct($db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = Database::getConnection();
     }
 
     function handleShows() {
@@ -31,7 +31,7 @@ class Shows {
 
     function updateShow($id, $timestamp, $name, $location, $details, $seats) {
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
-        $stmt = $this->db->getConnection()->prepare("UPDATE spettacoli 
+        $stmt = $this->db->prepare("UPDATE spettacoli 
             SET nome=?, luogo=?, dettagli=?, data=?, posti=? 
             WHERE id=?");
         $stmt->bind_param("ssssii", $name, $location, $details, $convertedDate, $seats, $id);
@@ -39,14 +39,14 @@ class Shows {
     }
 
     function returnDataForSpettacoloId($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT * FROM spettacoli WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT * FROM spettacoli WHERE id = ?");
         $stmt->bind_param("s", $id);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     function deleteShow($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT count(1) as count "
+        $stmt = $this->db->prepare("SELECT count(1) as count "
                 . "FROM users u "
                 . "JOIN users_shows us ON us.user_id = u.id "
                 . "AND us.show_id = ? "
@@ -59,19 +59,19 @@ class Shows {
                 return $r;
             }
         }
-        $stmt = $this->db->getConnection()->prepare("DELETE FROM spettacoli WHERE id=?");
+        $stmt = $this->db->prepare("DELETE FROM spettacoli WHERE id=?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
 
     function insertShow($timestamp, $name, $location, $details, $seats, $userId) {
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
-        $stmt = $this->db->getConnection()->prepare("INSERT INTO spettacoli (nome, luogo, dettagli, data, posti) "
+        $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, dettagli, data, posti) "
                 . "VALUES (?,?,?,?,?)");
         $stmt->bind_param("sssss", $name, $location, $details, $convertedDate, $seats);
         $stmt->execute();
         $showId = $stmt->insert_id;
-        $stmt = $this->db->getConnection()->prepare("INSERT INTO users_shows (show_id, user_id) "
+        $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
                 . "VALUES (?,?)");
         $stmt->bind_param("ii", $showId, $userId);
         $stmt->execute();
@@ -79,13 +79,26 @@ class Shows {
 
     function retriveAllfutureShow($id) {
         $now = date("Y-m-d G:i:s", time());
-        $stmt = $this->db->getConnection()->prepare("SELECT s.* "
+        $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "JOIN users_shows us ON us.show_id = s.id "
                 . "WHERE data >= ? "
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
         $stmt->bind_param("si", $now, $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    function retriveShowByShowIds($arrayOfIds) {
+        $inCondition = implode(', ', $arrayOfIds);
+        $now = date("Y-m-d G:i:s", time());
+        $stmt = $this->db->prepare("SELECT s.* "
+                . "FROM spettacoli s "
+                . "WHERE data >= ? "
+                . "AND s.ID IN  ($inCondition) "
+                . "ORDER BY data ASC");
+        $stmt->bind_param("s", $now);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
@@ -97,7 +110,7 @@ class Shows {
         } else {
             $today = date("Y-m-d G:i:s", $now);
         }
-        $stmt = $this->db->getConnection()->prepare("SELECT data,posti,id "
+        $stmt = $this->db->prepare("SELECT data,posti,id "
                 . "FROM spettacoli "
                 . "WHERE data >= ? "
                 . "ORDER BY `spettacoli`.`data` ASC");
@@ -114,7 +127,7 @@ class Shows {
     function getShowInUserScope($usersArray) {
         $result = array();
         foreach ($usersArray as $user) {
-            $stmt = $this->db->getConnection()->prepare("SELECT s.id "
+            $stmt = $this->db->prepare("SELECT s.id "
                     . "FROM spettacoli s "
                     . "JOIN users_shows us ON us.show_id = s.id "
                     . "AND us.user_id = ? "

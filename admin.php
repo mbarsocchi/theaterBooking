@@ -1,18 +1,16 @@
 <?php
 
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'RenderTemplate.php';
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Database.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 
-$db = new Database();
-$login = new Login($db);
+$login = new Login();
 
 $login->isAuth();
 
 
-$users = new Users($db);
+$users = new Users();
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $data['isAdmin'] = $thisUser['access_level'] == 0;
 $loginData['isLogged'] = true;
@@ -20,7 +18,7 @@ $loginData['isAdmin'] = $data['isAdmin'];
 $loginData['thispage'] = "admin";
 $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_head.php', $loginData);
 echo $head->render();
-$shows = new Shows($db);
+$shows = new Shows();
 
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('i', 'd', 'u'))) {

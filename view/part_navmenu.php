@@ -8,7 +8,6 @@
         <ul class="menu">
             <li><?php if (isset($thispage) && $thispage == 'booking') { ?>Prenotazioni
                 <?php } else { ?><a href="index.php">Prenotazioni</a><?php } ?></li>
-            <li>Profilo</li>
             <li><?php if (isset($thispage) && $thispage == 'print') { ?>Stampa
                 <?php } else { ?><a href="print.php">Stampa</a><?php } ?></li>
             <?php if ($isAdmin) { ?>

@@ -1,12 +1,13 @@
 <?php
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Database.php';
 
 class Login {
 
     private $db;
     private $errors;
 
-    public function __construct($db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = Database::getConnection();
     }
 
     function handleLogin() {
@@ -59,7 +60,7 @@ class Login {
                 true,
                 true
         );
-        $stmt = $this->db->getConnection()->prepare("INSERT INTO "
+        $stmt = $this->db->prepare("INSERT INTO "
                 . "auth_tokens (selector, token, userid, expires) "
                 . "VALUES (?, ?, ?, ?)");
         $token = hash('sha256', $authenticator);
@@ -70,7 +71,7 @@ class Login {
 
     private function updateSession($id) {
         $expireTimestamp = time() + 864000;
-        $stmt = $this->db->getConnection()->prepare("UPDATE "
+        $stmt = $this->db->prepare("UPDATE "
                 . "auth_tokens "
                 . "SET expires = ? "
                 . "WHERE userid = ?");
@@ -90,7 +91,7 @@ class Login {
     }
 
     private function canReAuthOnPageLoad($selector, $authenticator) {
-        $stmt = $this->db->getConnection()->prepare("SELECT at.*, u.user_login, u.id "
+        $stmt = $this->db->prepare("SELECT at.*, u.user_login, u.id "
                 . "FROM auth_tokens at "
                 . "JOIN users u ON at.userid = u.id "
                 . "WHERE selector = ?");
@@ -108,7 +109,7 @@ class Login {
             }
         }
         $expireTimestamp = time();
-        $stmt = $this->db->getConnection()->prepare("DELETE "
+        $stmt = $this->db->prepare("DELETE "
                 . "FROM auth_tokens "
                 . "WHERE expires < ? "
                 . "LIMIT 5");
@@ -128,7 +129,7 @@ class Login {
     }
 
     private function getUser($username, $password) {
-        $stmt = $this->db->getConnection()->prepare("SELECT id,user_login "
+        $stmt = $this->db->prepare("SELECT id,user_login "
                 . "FROM users WHERE "
                 . "user_login = ? "
                 . "AND password = ? ");
@@ -153,7 +154,7 @@ class Login {
             list($selector, $authenticator) = explode(':', $_COOKIE['remember']);
             unset($_COOKIE['remember']);
             setcookie('remember', '', -1, '/');
-            $stmt = $this->db->getConnection()->prepare("DELETE "
+            $stmt = $this->db->prepare("DELETE "
                     . "FROM auth_tokens "
                     . "WHERE selector = ?");
             $stmt->bind_param("s", $selector);

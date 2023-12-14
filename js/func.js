@@ -60,6 +60,14 @@ function validateAll(name, password, password2, login) {
     }
 }
 
+function validatePrint(){
+//     if ($('input:checkbox:checked[id^="show_' + $id + '"]').length != 0) {
+//        alert("Non puoi cancellare uno show senza prima cancellare tutti gli utenti associati");
+//        return false;
+//    }
+    return true;
+}
+
 function subAddShow() {
     var name = document.forms["addshow"]["namei"].value;
     var seat = document.forms["addshow"]["seatsi"].value;

@@ -4,8 +4,8 @@ class Users {
 
     private $db;
 
-    public function __construct($db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = Database::getConnection();
     }
 
     function handle() {
@@ -27,7 +27,7 @@ class Users {
     }
 
     function getUser($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT id, name, user_login, access_level "
+        $stmt = $this->db->prepare("SELECT id, name, user_login, access_level "
                 . "FROM users "
                 . "WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -38,7 +38,7 @@ class Users {
     }
 
     function getUserFromLogin($name) {
-        $stmt = $this->db->getConnection()->prepare("SELECT id, name, user_login, access_level "
+        $stmt = $this->db->prepare("SELECT id, name, user_login, access_level "
                 . "FROM users "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
@@ -49,7 +49,7 @@ class Users {
     }
 
     function getUsersInScope($id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
+        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
                 . "FROM users u "
                 . "JOIN users_shows us ON u.id = us.user_id "
                 . "WHERE show_id IN (SELECT show_id FROM users_shows "
@@ -62,7 +62,7 @@ class Users {
 
     function isAdmin($id) {
         $result = false;
-        $stmt = $this->db->getConnection()->prepare("SELECT access_level "
+        $stmt = $this->db->prepare("SELECT access_level "
                 . "FROM users WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -81,7 +81,7 @@ class Users {
             $r['erromessage'] = "Non puoi inserire un utente senza spettacoli associati";
             return $r;
         }
-        $stmt = $this->db->getConnection()->prepare("INSERT INTO users (name, user_login, password, access_level) "
+        $stmt = $this->db->prepare("INSERT INTO users (name, user_login, password, access_level) "
                 . "VALUES (?,?,?,?)");
         $hash = md5($passwordClear);
         $al = intval(trim($access_level));
@@ -89,7 +89,7 @@ class Users {
         $stmt->execute();
         $userId = $stmt->insert_id;
         foreach ($showsArray as $showId) {
-            $stmt = $this->db->getConnection()->prepare("INSERT INTO users_shows (show_id, user_id) "
+            $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
                     . "VALUES (?,?)");
             $si = intval($showId);
             $stmt->bind_param("ii", $si, $userId);
@@ -98,7 +98,7 @@ class Users {
     }
 
     function deleteUser($id) {
-        $stmt = $this->db->getConnection()->prepare("DELETE FROM users WHERE id=?");
+        $stmt = $this->db->prepare("DELETE FROM users WHERE id=?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
@@ -111,14 +111,14 @@ class Users {
         $currentShowsForUser = $this->getShowsForUser($userId);
 
         if ($passwordClear != null & $passwordClear != "") {
-            $stmt = $this->db->getConnection()->prepare("UPDATE users 
+            $stmt = $this->db->prepare("UPDATE users 
             SET name=?, user_login=?, password=?, access_level=? 
             WHERE id=?");
             $hash = md5($passwordClear);
             $al = intval(trim($access_level));
             $stmt->bind_param("sssii", $name, $user_login, $hash, $access_level, $userId);
         } else {
-            $stmt = $this->db->getConnection()->prepare("UPDATE users 
+            $stmt = $this->db->prepare("UPDATE users 
             SET name=?, user_login=?, access_level=? 
             WHERE id=?");
             $al = intval(trim($access_level));
@@ -127,7 +127,7 @@ class Users {
         $stmt->execute();
         $toAddArr = array_diff($showsArray, $currentShowsForUser);
         foreach ($toAddArr as $showId) {
-            $stmt = $this->db->getConnection()->prepare("INSERT INTO users_shows (show_id, user_id) "
+            $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
                     . "VALUES (?,?)");
             $si = intval($showId);
             $stmt->bind_param("ii", $si, $userId);
@@ -135,7 +135,7 @@ class Users {
         }
         $toDeleteArr = array_diff($currentShowsForUser, $showsArray);
         foreach ($toDeleteArr as $showId) {
-            $stmt = $this->db->getConnection()->prepare("DELETE FROM users_shows "
+            $stmt = $this->db->prepare("DELETE FROM users_shows "
                     . "WHERE show_id =? "
                     . "AND user_id = ?");
             $si = intval($showId);
@@ -146,7 +146,7 @@ class Users {
 
     function getShowsForUser($userId) {
         $result = array();
-        $stmt = $this->db->getConnection()->prepare("SELECT s.id "
+        $stmt = $this->db->prepare("SELECT s.id "
                 . "FROM spettacoli s "
                 . "JOIN users_shows us ON us.show_id = s.id "
                 . "AND us.user_id = ? "

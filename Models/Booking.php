@@ -6,8 +6,8 @@ class Booking {
 
     private $db;
 
-    public function __construct($db) {
-        $this->db = $db;
+    public function __construct() {
+        $this->db = Database::getConnection();
     }
 
     function handleBooking() {
@@ -41,7 +41,7 @@ class Booking {
     }
 
     function deletePreno($id) {
-        $stmt = $this->db->getConnection()->prepare("DELETE FROM prenotazioni WHERE id = ?");
+        $stmt = $this->db->prepare("DELETE FROM prenotazioni WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
@@ -62,7 +62,7 @@ class Booking {
     }
 
     function insertPreno($name, $userId, $id) {
-        $stmt = $this->db->getConnection()->prepare("SELECT id,posti FROM spettacoli WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id,posti FROM spettacoli WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
@@ -70,7 +70,7 @@ class Booking {
             $maxPosti = $show['posti'];
             $stmt->free_result();
         }
-        $stmt = $this->db->getConnection()->prepare("SELECT count(1) as count FROM prenotazioni WHERE id_spettacolo = ?");
+        $stmt = $this->db->prepare("SELECT count(1) as count FROM prenotazioni WHERE id_spettacolo = ?");
         $stmt->bind_param("s", $idShow);
         $stmt->execute();
         $rows = $stmt->get_result()->fetch_assoc();
@@ -80,14 +80,14 @@ class Booking {
             echo "non ci sono più posti";
         } else {
             $today = date("y-m-d G:i:s");
-            $stmt = $this->db->getConnection()->prepare("INSERT INTO prenotazioni (id_spettacolo, nome, id_user_ref, _ins) "
+            $stmt = $this->db->prepare("INSERT INTO prenotazioni (id_spettacolo, nome, id_user_ref, _ins) "
                     . "VALUES (?,?,?,?)");
             $stmt->bind_param("isis", $idShow, $name, $userId, $today);
             $stmt->execute();
         }
     }
 
-    function getBookings($showDates) {
+    function getBookings($showDates) {        
         $inCondition = $this->builtInCondition($showDates);
         $bookingsAll = $this->getBookingData($inCondition);
         $temp = $this->reorderPrenos($bookingsAll);
@@ -122,7 +122,7 @@ class Booking {
     }
 
     private function getBookingData($idArrays) {
-        $stmt = $this->db->getConnection()->prepare("SELECT s.data, s.nome, p.id, p.nome, p.id_user_ref,  u.name as riferimento, p.prenocode "
+        $stmt = $this->db->prepare("SELECT s.data, s.nome, p.id, p.nome, p.id_user_ref,  u.name as riferimento, p.prenocode "
                 . "FROM prenotazioni AS p "
                 . "LEFT JOIN spettacoli s ON s.id = p.id_spettacolo "
                 . "LEFT JOIN users u ON u.id = p.id_user_ref "
