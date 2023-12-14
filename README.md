@@ -11,4 +11,10 @@ webapp is able to
 - Seats are a constrain to booking add, so no more than X people will be booked
 
 # Install
+Install html2pdf with composer, run this command in the root of this project
+
+```bash
+composer require spipu/html2pdf'
+```
+
 configure config_default.php and save it as config.php

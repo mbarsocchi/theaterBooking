@@ -4,7 +4,6 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Database.php';
 class Login {
 
     private $db;
-    private $errors;
 
     public function __construct() {
         $this->db = Database::getConnection();
