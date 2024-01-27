@@ -104,10 +104,6 @@ class Users {
     }
 
     function updateUser($userId, $name, $user_login, $passwordClear, $access_level, $showsArray) {
-        if ($showsArray == null) {
-            $r['erromessage'] = "Non puoi togliere tutti gli spettacoli ad un utente, puoi eliminare l'utente";
-            return $r;
-        }
         $currentShowsForUser = $this->getShowsForUser($userId);
 
         if ($passwordClear != null & $passwordClear != "") {
@@ -125,22 +121,27 @@ class Users {
             $stmt->bind_param("ssii", $name, $user_login, $access_level, $userId);
         }
         $stmt->execute();
-        $toAddArr = array_diff($showsArray, $currentShowsForUser);
-        foreach ($toAddArr as $showId) {
-            $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
-                    . "VALUES (?,?)");
-            $si = intval($showId);
-            $stmt->bind_param("ii", $si, $userId);
-            $stmt->execute();
-        }
-        $toDeleteArr = array_diff($currentShowsForUser, $showsArray);
-        foreach ($toDeleteArr as $showId) {
-            $stmt = $this->db->prepare("DELETE FROM users_shows "
-                    . "WHERE show_id =? "
-                    . "AND user_id = ?");
-            $si = intval($showId);
-            $stmt->bind_param("ii", $si, $userId);
-            $stmt->execute();
+        if ($showsArray == null && $currentShowsForUser != null) {
+            $r['erromessage'] = "Non puoi togliere tutti gli spettacoli ad un utente, puoi eliminare l'utente";
+            return $r;
+        } else if ($currentShowsForUser != null) {
+            $toAddArr = array_diff($showsArray, $currentShowsForUser);
+            foreach ($toAddArr as $showId) {
+                $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
+                        . "VALUES (?,?)");
+                $si = intval($showId);
+                $stmt->bind_param("ii", $si, $userId);
+                $stmt->execute();
+            }
+            $toDeleteArr = array_diff($currentShowsForUser, $showsArray);
+            foreach ($toDeleteArr as $showId) {
+                $stmt = $this->db->prepare("DELETE FROM users_shows "
+                        . "WHERE show_id =? "
+                        . "AND user_id = ?");
+                $si = intval($showId);
+                $stmt->bind_param("ii", $si, $userId);
+                $stmt->execute();
+            }
         }
     }
 

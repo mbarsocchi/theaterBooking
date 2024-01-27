@@ -22,6 +22,9 @@ html, body {
 }
 table {
     font-size: unset;
+    margin-left: 5px;
+    margin-right: 5px;
+    width: -webkit-fill-available;
 }
 form {
     margin-left: 5px;
@@ -60,6 +63,7 @@ tr {
 input {
     height: 80px;
     font-size: 34px;
+    width:100%;
 }
 select {
     height: 80px;
@@ -202,4 +206,32 @@ select {
 }
 a:visited {
     color: #5791ff;
+}
+
+
+@breakpoint: 500px;
+
+/* Responsive
+==================================== */
+@media all and (max-width: @breakpoint) {
+    .Rtable--collapse  {
+        display: block;
+        > .Rtable-cell {
+            width: 100% !important;
+        }
+        > .Rtable-cell--foot {
+            margin-bottom: 1em;
+        }
+    }
+}
+
+// Non-Flex modernizer fallback
+.no-flexbox .Rtable {
+    display: block;
+    > .Rtable-cell {
+        width: 100%;
+    }
+    > .Rtable-cell--foot {
+        margin-bottom: 1em;
+    }
 }

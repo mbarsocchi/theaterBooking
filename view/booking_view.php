@@ -6,7 +6,7 @@
                 <?php foreach ($allBookings as $day => $bookingData) {
                     ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
                 <?php } ?></select><br />
-            <div class="spacer"/>
+            <div class="spacer"></div>
         <?php } else{?>
             <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
         <?php }?>
@@ -57,6 +57,6 @@
                 </tr>
         <?php } ?>
         </table>
-        <br/><br/>
+        <div class="spacer"></div>
     <?php } ?>
 <?php } ?>
