@@ -3,6 +3,7 @@
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'DateUtil.php';
 
 class Shows {
+    const SQL_DATE_FORMAT= "y-m-d G:i:s";
 
     private $db;
 
@@ -78,7 +79,7 @@ class Shows {
     }
 
     function retriveAllfutureShow($id) {
-        $now = date("Y-m-d G:i:s", time());
+        $now = date(self::SQL_DATE_FORMAT, time());
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "JOIN users_shows us ON us.show_id = s.id "
@@ -92,7 +93,7 @@ class Shows {
 
     function retriveShowByShowIds($arrayOfIds) {
         $inCondition = implode(', ', $arrayOfIds);
-        $now = date("Y-m-d G:i:s", time());
+        $now = date(self::SQL_DATE_FORMAT, time());
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "WHERE data >= ? "
@@ -106,9 +107,9 @@ class Shows {
     function returnDateOfShows($limit = false) {
         $now = time();
         if ($limit) {
-            $today = date("Y-m-d G:i:s", $now + STOP_PRENO_HOUR);
+            $today = date(self::SQL_DATE_FORMAT, $now + STOP_PRENO_HOUR);
         } else {
-            $today = date("Y-m-d G:i:s", $now);
+            $today = date(self::SQL_DATE_FORMAT, $now);
         }
         $stmt = $this->db->prepare("SELECT data,posti,id "
                 . "FROM spettacoli "

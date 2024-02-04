@@ -5,7 +5,7 @@
         $checked = "checked";
         foreach ($futureShow as $oneShow) {
             $date = new DateTime($oneShow['data']);
-            $dateFormatted = $date->format('d/m/y h:i');
+            $dateFormatted = $date->format('d/m/y H:i');
             ?>
             <div class="foc" >
                 <input type="checkbox" class="checkbox" name="showId[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?>> <?php echo $dateFormatted; ?> <?php echo $oneShow['nome']; ?>

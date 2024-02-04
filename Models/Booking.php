@@ -3,7 +3,8 @@
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'DateUtil.php';
 
 class Booking {
-
+    const DATE_FORMAT ='d/m/y H:i';
+    const SQL_DATE_FORMAT= "y-m-d G:i:s";
     private $db;
 
     public function __construct() {
@@ -29,7 +30,7 @@ class Booking {
         $preno_table = $wpdb->prefix . THEATER_BOOKING_TBNAME;
         $current_user = wp_get_current_user();
         $currentUserName = $current_user->user_login;
-        $today = date("y-m-d G:i:s");
+        $today = date(self::SQL_DATE_FORMAT);
         if (!current_user_can('manage_options') && $riferimentoSent == $currentUserName) {
             $returned = $wpdb->update($preno_table, array('_upd' => $today, 'prenocode' => $code),
                     array('id' => $id,
@@ -49,7 +50,7 @@ class Booking {
     function updatePrenoName($namePost, $idPost) {
         if (isset($namePost) && isset($idPost)) {
             $currentUserName = $current_user->user_login;
-            $today = date("y-m-d G:i:s");
+            $today = date(self::SQL_DATE_FORMAT);
             if (!current_user_can('manage_options')) {
                 $returned = $wpdb->update($preno_table, array('nome' => $_POST['firstname'], '_upd' => $today),
                         array('id' => $_POST['id'],
@@ -79,7 +80,7 @@ class Booking {
         if ($count + 1 > $maxPosti) {
             echo "non ci sono più posti";
         } else {
-            $today = date("y-m-d G:i:s");
+            $today = date(self::SQL_DATE_FORMAT);
             $stmt = $this->db->prepare("INSERT INTO prenotazioni (id_spettacolo, nome, id_user_ref, _ins) "
                     . "VALUES (?,?,?,?)");
             $stmt->bind_param("isis", $idShow, $name, $userId, $today);
@@ -94,7 +95,7 @@ class Booking {
         $bookingData = array();
         foreach ($showDates as $show) {
             $date = new DateTime($show['data']);
-            $dateFormatted = $date->format('d/m/y h:i');
+            $dateFormatted = $date->format(self::DATE_FORMAT);
             $bookingData[$dateFormatted]['id'] = $show['id'];
             $bookingData[$dateFormatted]['title'] = $show['nome'];
             $bookingData[$dateFormatted]['dayOfTheWeek'] = DateUtil::transformDay($date->format('N'));
@@ -109,7 +110,7 @@ class Booking {
         $result = array();
         foreach ($prenos as $prenoPerDay) {
             $date = new DateTime($prenoPerDay['data']);
-            $dateFormatted = $date->format('d/m/y h:i');
+            $dateFormatted = $date->format(self::DATE_FORMAT);
             $result[$dateFormatted]['bookings'][] = array(
                 'id' => $prenoPerDay['id'],
                 'name' => $prenoPerDay['nome'],
