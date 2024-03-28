@@ -47,6 +47,14 @@ class Users {
         $r = count($r) == 0 ? null : $r[0];
         return $r;
     }
+    
+    function getAllUsers(){
+         $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
+                . "FROM users u "
+                . "ORDER BY u.name ASC;");
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 
     function getUsersInScope($id) {
         $now = date('Y-m-d H:i:s');
@@ -124,10 +132,7 @@ class Users {
             $stmt->bind_param("ssii", $name, $user_login, $access_level, $userId);
         }
         $stmt->execute();
-        if ($showsArray == null && $currentShowsForUser != null) {
-            $r['erromessage'] = "Non puoi togliere tutti gli spettacoli ad un utente, puoi eliminare l'utente";
-            return $r;
-        } else if ($currentShowsForUser != null) {
+        
             $toAddArr = array_diff($showsArray, $currentShowsForUser);
             foreach ($toAddArr as $showId) {
                 $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
@@ -145,7 +150,7 @@ class Users {
                 $stmt->bind_param("ii", $si, $userId);
                 $stmt->execute();
             }
-        }
+       
     }
 
     function getShowsForUser($userId) {

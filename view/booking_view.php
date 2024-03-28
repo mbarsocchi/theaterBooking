@@ -7,25 +7,27 @@
                     ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
                 <?php } ?></select><br />
             <div class="spacer"></div>
-        <?php } else{?>
+        <?php } else { ?>
             <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
-        <?php }?>
+        <?php } ?>
         <input type="hidden" name="f" value="b"/>
         <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome e cognome"/><br />
         <?php if ($isAdmin) { ?>
             Inserisci come: <select name="user" style="margin-bottom: 20px;">";
-                <?php foreach ($usersInScope as $user) {
+                <?php
+                foreach ($usersInScope as $user) {
                     if (strcasecmp($thisUserId, trim($user['id'])) == 0) {
                         ?><option selected="selected" value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
                     <?php } else { ?><option value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
-                    <?php }
+                    <?php
+                    }
                 }
                 ?>
             </select>
     <?php } else { ?><input type="hidden" name="user" value="<?php echo $thisUserId; ?>"><?php } ?><br />
         <input type="submit" value="Inserisci prenotazione" style="margin-bottom: 20px;width:100%"/>    
     </form>
-<div class="spacer"></div>
+    <div class="spacer"></div>
     <?php foreach ($allBookings as $day => $bookingData) { ?>
         <table border="1" style="border:1px black;border-collapse:collapse;">
             <tr class="tableHeader">
@@ -58,5 +60,12 @@
         <?php } ?>
         </table>
         <div class="spacer"></div>
+        <?php } ?>
+    <?php } else { ?>
+    <h2>Nessuno show 
+        <?php if (!$isAdmin) { ?>
+            chiedi all'amministratore di creare uno spettacolo
+    <?php } else { ?>
+            <a href="shows.php">crea uno spettacolo</a></h2>
     <?php } ?>
 <?php } ?>

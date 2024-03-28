@@ -26,7 +26,11 @@ class Shows {
             default:
                 break;
         }
-        header('Location: admin.php');
+        if (filter_input(INPUT_GET, 'si') != null) {
+            header('Location: shows.php?si='.filter_input(INPUT_GET, 'si'));
+        } else {
+            header('Location: shows.php');
+        }
         return $r;
     }
 
@@ -43,7 +47,9 @@ class Shows {
         $stmt = $this->db->prepare("SELECT * FROM spettacoli WHERE id = ?");
         $stmt->bind_param("s", $id);
         $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $r = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $r = count($r) == 0 ? null : $r[0];
+        return $r;
     }
 
     function deleteShow($id) {
