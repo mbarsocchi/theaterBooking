@@ -49,13 +49,16 @@ class Users {
     }
 
     function getUsersInScope($id) {
+        $now = date('Y-m-d H:i:s');
         $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
                 . "FROM users u "
                 . "JOIN users_shows us ON u.id = us.user_id "
-                . "WHERE show_id IN (SELECT show_id FROM users_shows "
-                . "WHERE user_id = ? )"
+                . "WHERE show_id IN (SELECT show_id FROM users_shows us "
+                . "JOIN spettacoli s ON s.id = us.show_id "
+                . "WHERE user_id = ? "
+                . "AND s.data >= ?)"
                 . "ORDER BY u.name ASC;");
-        $stmt->bind_param("i", $id);
+        $stmt->bind_param("is", $id,$now);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
