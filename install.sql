@@ -62,3 +62,23 @@ CREATE TABLE `auth_tokens` (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
+
+CREATE TABLE `theatre_companies` (
+    `id` integer(11) not null AUTO_INCREMENT,
+    `nome` text NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `companies_users` (
+    `id` integer(11) not null AUTO_INCREMENT,
+    `company_id` int(11) NOT NULL,
+    `user_id` int(11) NOT NULL,
+    `is_company_admin` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`company_id`)
+        REFERENCES theatre_companies (id)
+        ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`)
+        REFERENCES users (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

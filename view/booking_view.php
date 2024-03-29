@@ -5,8 +5,8 @@
             <select name="showId" style="margin-bottom: 20px;width:100%">
                 <?php foreach ($allBookings as $day => $bookingData) {
                     ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
-                <?php } ?></select><br />
-            <div class="spacer"></div>
+                <?php } ?></select>
+            <div class="mid-spacer"></div>
         <?php } else { ?>
             <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
         <?php } ?>
@@ -27,7 +27,7 @@
     <?php } else { ?><input type="hidden" name="user" value="<?php echo $thisUserId; ?>"><?php } ?><br />
         <input type="submit" value="Inserisci prenotazione" style="margin-bottom: 20px;width:100%"/>    
     </form>
-    <div class="spacer"></div>
+    <div class="mid-spacer"></div>
     <?php foreach ($allBookings as $day => $bookingData) { ?>
         <table border="1" style="border:1px black;border-collapse:collapse;">
             <tr class="tableHeader">
@@ -59,7 +59,7 @@
                 </tr>
         <?php } ?>
         </table>
-        <div class="spacer"></div>
+        <div class="mid-spacer"></div>
         <?php } ?>
     <?php } else { ?>
     <h2>Nessuno show 
