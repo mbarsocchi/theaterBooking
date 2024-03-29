@@ -9,7 +9,6 @@ $login = new Login();
 
 $login->isAuth();
 
-
 $users = new Users();
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $data['isAdmin'] = $thisUser['access_level'] == 0;
@@ -20,12 +19,15 @@ $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SE
 echo $head->render();
 $shows = new Shows();
 if (filter_input(INPUT_POST, 'f') != null) {
-    if (in_array(filter_input(INPUT_POST, 'f'), array('i','d', 'u'))) {
+    if (in_array(filter_input(INPUT_POST, 'f'), array('i', 'd', 'u'))) {
         $r = $shows->handleShows();
     }
 }
 if (filter_input(INPUT_GET, 'si') != null) {
     $data['showToModify'] = $shows->returnDataForSpettacoloId(filter_input(INPUT_GET, 'si'));
+    if (isset($data['showToModify']['data'])) {
+        $data['showToModify']['data'] = date("Y-m-d H:i", strtotime($data['showToModify']['data']));
+    }
 }
 if (isset($r) && isset($r['erromessage'])) {
     $data['errors'] = $r['erromessage'];
@@ -34,8 +36,6 @@ if (isset($r) && isset($r['erromessage'])) {
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
 $data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
-
-
 
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
 echo $tmpl->render();
