@@ -37,6 +37,7 @@ if ($numberOfShows) {
         echo $head->render();
         $loginData['isLogged'] = true;
         $loginData['isAdmin'] = $thisUser['access_level'] == 0;
+        $loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
         $loginData['thispage'] = "print";
         $menu = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
         echo $menu->render();

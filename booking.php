@@ -21,7 +21,7 @@ if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, '
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $data['isAdmin'] = $thisUser['access_level'] == 0;
-if ($data['isAdmin']) {
+if ($data['isAdmin'] || $thisUser['is_company_admin']) {
     $data['usersInScope'] = $users->getUsersInScope($thisUser['id']);
 }
 $data['userName'] = $thisUser['name'];
@@ -31,8 +31,10 @@ $data['allBookings'] = array();
 if (count($futureShows)) {
     $data['allBookings'] = $booking->getBookings($shows->retriveAllfutureShow($thisUser['id']));
 }
+$data['isCompanyAdmin'] = $thisUser['is_company_admin'];
 $loginData['isLogged'] = true;
 $loginData['isAdmin'] = $data['isAdmin'];
+$loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
 $loginData['thispage'] = "booking";
 $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php',$loginData);
 echo $head->render();

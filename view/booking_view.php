@@ -12,7 +12,7 @@
         <?php } ?>
         <input type="hidden" name="f" value="b"/>
         <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome e cognome"/><br />
-        <?php if ($isAdmin) { ?>
+        <?php if ($isAdmin || $isCompanyAdmin) { ?>
             Inserisci come: <select name="user" style="margin-bottom: 20px;">";
                 <?php
                 foreach ($usersInScope as $user) {
@@ -43,7 +43,7 @@
                 <?php foreach ($bookingData['bookings'] as $i => $bookingName) { ?>
                 <tr>
                     <td style="width:2%"><?php echo $i + 1; ?></td>
-            <?php if ($isAdmin || $thisUserId == $bookingName['riferimentoId']) { ?>
+            <?php if ($isAdmin || $isCompanyAdmin || $thisUserId == $bookingName['riferimentoId']) { ?>
                         <td style="width:45%" class="no-right-brd"><?php echo $bookingName['name']; ?></td>
                         <td style="width:4%">    
                             <form name="delete_bookin_<?php echo $bookingName['id']; ?>" method="post" onsubmit="return confirmDeleteBooking()">
@@ -63,9 +63,9 @@
         <?php } ?>
     <?php } else { ?>
     <h2>Nessuno show 
-        <?php if (!$isAdmin) { ?>
-            chiedi all'amministratore di creare uno spettacolo
-    <?php } else { ?>
+        <?php if ($isAdmin || $isCompanyAdmin) { ?>
             <a href="shows.php">crea uno spettacolo</a></h2>
+    <?php } else { ?>
+            chiedi all'amministratore di creare uno spettacolo
     <?php } ?>
 <?php } ?>

@@ -82,3 +82,16 @@ CREATE TABLE `companies_users` (
         REFERENCES users (id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `companies_shows` (
+    `id` integer(11) not null AUTO_INCREMENT,
+    `company_id` int(11) NOT NULL,
+    `show_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`company_id`)
+        REFERENCES theatre_companies (id)
+        ON DELETE CASCADE,
+  FOREIGN KEY (`show_id`)
+        REFERENCES spettacoli (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

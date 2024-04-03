@@ -11,31 +11,44 @@ $login->isAuth();
 
 
 $users = new Users();
-$thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
-$data['isAdmin'] = $thisUser['access_level'] == 0;
+$thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $loginData['isLogged'] = true;
-$loginData['isAdmin'] = $data['isAdmin'];
+$loginData['isAdmin'] = $thisUser['access_level'] == 0;
+$loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
 $loginData['thispage'] = "user";
-$head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_head.php', $loginData);
-echo $head->render();
+
+
 $shows = new Shows();
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('au', 'uu', 'du'))) {
         $r = $users->handle();
     }
 }
-if (filter_input(INPUT_GET, 'ui') != null && filter_input(INPUT_POST, 'f')!= 'du') {
-    $data['userToModify'] = $users->getUser(filter_input(INPUT_GET, 'ui'));
+
+if ($loginData['isAdmin'] ){
+    $data['usersInScope'] = $users->getAllUsers();
+}else if ($loginData['isCompanyAdmin']){
+    $data['usersInScope'] = $users->getAllUsersByCompany($thisUser['company']);
+}
+foreach ($data['usersInScope'] as $element) {
+    $usersIdInScope[] = $element['id'];
 }
 
+if (filter_input(INPUT_GET, 'ui') != null && 
+        filter_input(INPUT_POST, 'f')!= 'du' &&
+        in_array(filter_input(INPUT_GET, 'ui'),$usersIdInScope)) {
+    $data['userToModify'] = $users->getUser(filter_input(INPUT_GET, 'ui'));
+    $data['userToModify']['company'] = array_intersect_key($data['userToModify']['company'], $thisUser['company']);
+}
 
+$data['isAdmin'] = $thisUser['access_level'] == 0;
+$data['isCompanyAdmin'] = $thisUser['is_company_admin'];
+$data['companies']= $thisUser['company'];
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
-$data['usersInScope'] = $users->getAllUsers();
+$data['isAdmin'] = $thisUser['is_company_admin'];
 $data['showUserMap'] = $shows->getShowInUserScope($data['usersInScope']);
 $data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
-
-
 
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
 echo $tmpl->render();

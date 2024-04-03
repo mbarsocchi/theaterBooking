@@ -1,54 +1,58 @@
 <div class="content">
     <h2><?php if (count($usersInScope)) { ?>
         Modifica:
-        <?php foreach ($usersInScope as $user) { ?>
-           <?php if (isset($userToModify['id']) && $userToModify['id'] == $user['id']){?>
-                <?php echo $user['name']; ?>
-           <?php }else{?>
-                <a href="?ui=<?php echo $user['id']; ?>"><?php echo  $user['name']; ?></a>                
-           <?php }?>
-        <?php }?>
-    <?php } ?>
+            <?php foreach ($usersInScope as $user) { ?>
+                <?php if (isset($userToModify['id']) && $userToModify['id'] == $user['id']) { ?>
+                    <?php echo $user['name']; ?>
+                <?php } else { ?>
+                    <a href="?ui=<?php echo $user['id']; ?>"><?php echo $user['name']; ?></a>                
+                <?php } ?>
+            <?php } ?>
+        <?php } ?>
     </h2>
-<?php if (count($usersInScope) && count($futureShow) && !isset($userToModify)) { ?>
-    <h2>Inserisci nuovo utente</h2>
-    <form name="adduser" method="post" onsubmit="return validateAddUser()">
-        <div class="foc">
-            <input type="hidden" name="f" value= "au">
-        </div>
-        <div class="foc">
-            <input type="text" name="name" placeholder="Nome per esteso" value= "">
-        </div>
-        <div class="foc">
-            <input type="text" name="login" placeholder="Login" value= "">
-        </div>
-        <div class="foc">
-            <input type="password" name="password" placeholder="Password" value= "">  
-        </div> 
-        <div class="foc">
-            <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
-        </div>
-        <div class="foc">
-            <input type="text" name="accessLevel" placeholder="Livello d'accesso" value= "1">
-        </div>
-        <div class="foc">
-            <?php
-            $checked = "checked";
-            foreach ($futureShow as $oneShow) {
-                ?>
-                <input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><br>
+    <?php if (count($usersInScope) && !isset($userToModify)) { ?>
+        <h2>Inserisci nuovo utente</h2>
+        <form name="adduser" method="post" onsubmit="return validateAddUser()">
+            <input type="hidden" name="said" value= "<?php echo $thisUserId; ?>">
+            <div class="foc">
+                <input type="hidden" name="f" value= "au">
+            </div>
+            <div class="foc">
+                <input type="text" name="name" placeholder="Nome per esteso" value= "">
+            </div>
+            <div class="foc">
+                <input type="text" name="login" placeholder="Login" value= "">
+            </div>
+            <div class="foc">
+                <input type="password" name="password" placeholder="Password" value= "">  
+            </div> 
+            <div class="foc">
+                <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
+            </div>
+            <div class="foc">
+                <?php foreach ($companies as $companyId => $compData) { ?>
+                    Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" >
+                <?php } ?>
+            </div>
+            <div class="foc">
                 <?php
-                $checked = "";
-            }
-            ?>
-        </div>
-        <div class="foc">
-            <input type="submit" value="Inserisci" />
-        </div>
-    </form>
-<?php } else if (isset($userToModify)){ ?>
-    <a href="users.php"><h2>Inserisci nuovo utente</h2></a>
-    <form name="update_user_<?php echo $userToModify['id']; ?>" method="post" onsubmit="return validateUpdateUser(<?php echo $userToModify['id']; ?>)" >
+                $checked = "checked";
+                foreach ($futureShow as $oneShow) {
+                    ?>
+                    <input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><br>
+                    <?php
+                    $checked = "";
+                }
+                ?>
+            </div>
+            <div class="foc">
+                <input type="submit" value="Inserisci" />
+            </div>
+        </form>
+    <?php } else if (isset($userToModify)) { ?>
+        <a href="users.php"><h2>Inserisci nuovo utente</h2></a>
+        <form name="update_user_<?php echo $userToModify['id']; ?>" method="post" onsubmit="return validateUpdateUser(<?php echo $userToModify['id']; ?>)" >
+            <input type="hidden" name="said" value= "<?php echo $thisUserId; ?>">
             <input type="hidden" name="id" value= "<?php echo $userToModify['id']; ?>">
             <input type="hidden" name="f" value= "uu"> 
             <div class="foc">
@@ -66,11 +70,14 @@
             <div class="foc"><?php
                 $enable = $thisUserId != $userToModify['id'] ? "" : "readonly";
                 $disabled = $thisUserId != $userToModify['id'] ? "" : "disabled";
-                ?> 
-                <input type="text" name="accessLevel" value= "<?php echo $userToModify['access_level']; ?>" <?php echo $enable; ?>>
+                foreach ($userToModify['company'] as $companyId => $compData) {
+                    $isCompanyAdminChecked = $compData['isCompanyAdmin'] ? "checked" : "";
+                    ?>
+                    Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
+                <?php } ?>
             </div>
             <div class="foc"><?php
-                if ($isAdmin) {
+                if ($isAdmin || $isCompanyAdmin) {
                     foreach ($futureShow as $oneShow) {
                         $showChecked = isset($showUserMap[$userToModify['id']]) && in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
                         ?>
@@ -103,7 +110,5 @@
                 </form>
             <?php } ?>
         </div>
-<?php }else {?>
-    <h2>devi prima <a href="shows.php">creare uno spettacolo</a></h2>
-<?php }?>
+    <?php } ?>
 </div>

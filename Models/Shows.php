@@ -3,7 +3,8 @@
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'DateUtil.php';
 
 class Shows {
-    const SQL_DATE_FORMAT= "y-m-d G:i:s";
+
+    const SQL_DATE_FORMAT = "y-m-d G:i:s";
 
     private $db;
 
@@ -27,7 +28,7 @@ class Shows {
                 break;
         }
         if (filter_input(INPUT_GET, 'si') != null) {
-            header('Location: shows.php?si='.filter_input(INPUT_GET, 'si'));
+            header('Location: shows.php?si=' . filter_input(INPUT_GET, 'si'));
         } else {
             header('Location: shows.php');
         }
@@ -82,6 +83,20 @@ class Shows {
                 . "VALUES (?,?)");
         $stmt->bind_param("ii", $showId, $userId);
         $stmt->execute();
+        
+        $stmt = $this->db->prepare("SELECT company_id FROM companies_users "
+                . "WHERE user_id = ? "
+                . "AND is_company_admin = 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        $companyIdArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        foreach ($companyIdArray as $companyId) {
+            $stmt = $this->db->prepare("INSERT INTO companies_shows (company_id,show_id) "
+                    . "VALUES (?,?)");
+            $stmt->bind_param("ii", $companyId, $showId);
+            $stmt->execute();
+        }
     }
 
     function retriveAllfutureShow($id) {
