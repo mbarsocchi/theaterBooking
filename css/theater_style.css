@@ -65,6 +65,13 @@ input {
     font-size: 34px;
     width:100%;
 }
+input[type='checkbox']{
+    height: 80px;
+    width: 80px;
+    vertical-align: middle;
+    position: relative;
+    left: 5%;
+}    
 select {
     height: 80px;
     min-width: 20%;
@@ -72,6 +79,7 @@ select {
 }
 .foc{
     margin:100px 10px;
+    font-size:34px;
 }
 .form-control {
     width: 100%;

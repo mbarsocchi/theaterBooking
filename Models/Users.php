@@ -30,8 +30,8 @@ class Users {
     function getUser($id) {
         $stmt = $this->db->prepare("SELECT u.id, name, user_login, company_id, tc.nome, is_company_admin "
                 . "FROM users u "
-                . "JOIN companies_users cu ON u.id = cu.user_id "
-                . "JOIN theatre_companies tc ON tc.id = cu.company_id "
+                . "LEFT JOIN companies_users cu ON u.id = cu.user_id "
+                . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE u.id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -42,6 +42,7 @@ class Users {
             $result['id'] = $queryResults[0]['id'];
             $result['name'] = $queryResults[0]['name'];
             $result['user_login'] = $queryResults[0]['user_login'];
+            $result['company'] = array();
             foreach ($queryResults as $userData) {
                 if ($userData['is_company_admin'] !== null) {
                     $result['company'][$userData['company_id']]['name'] = $userData['nome'];

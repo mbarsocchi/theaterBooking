@@ -9,7 +9,7 @@ CREATE TABLE `spettacoli` (
   `data` datetime NOT NULL,
   `posti` int NOT NULL DEFAULT '40',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `prenotazioni` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -27,7 +27,7 @@ CREATE TABLE `prenotazioni` (
   FOREIGN KEY (`id_spettacolo`)
         REFERENCES spettacoli (id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -36,7 +36,7 @@ CREATE TABLE `users` (
   `password` varchar(40) NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `users_shows` (
   `id` int(11) NOT NULL  AUTO_INCREMENT,
@@ -49,7 +49,7 @@ CREATE TABLE `users_shows` (
   FOREIGN KEY (`user_id`)
         REFERENCES users (id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `auth_tokens` (
     `id` integer(11) not null AUTO_INCREMENT,
@@ -81,7 +81,7 @@ CREATE TABLE `companies_users` (
   FOREIGN KEY (`user_id`)
         REFERENCES users (id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `companies_shows` (
     `id` integer(11) not null AUTO_INCREMENT,
@@ -94,4 +94,4 @@ CREATE TABLE `companies_shows` (
   FOREIGN KEY (`show_id`)
         REFERENCES spettacoli (id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) DEFAULT CHARSET=latin1;

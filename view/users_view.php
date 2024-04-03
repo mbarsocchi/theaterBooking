@@ -29,22 +29,23 @@
             <div class="foc">
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
-            <div class="foc">
-                <?php foreach ($companies as $companyId => $compData) { ?>
-                    Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" >
-                <?php } ?>
-            </div>
-            <div class="foc">
-                <?php
-                $checked = "checked";
-                foreach ($futureShow as $oneShow) {
-                    ?>
-                    <input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><br>
-                    <?php
-                    $checked = "";
-                }
+
+            <?php foreach ($companies as $companyId => $compData) { ?>
+                <div class="foc">
+                    <label>Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" ></label>
+                </div>
+            <?php } ?>
+            <?php
+            $checked = "checked";
+            foreach ($futureShow as $oneShow) {
                 ?>
-            </div>
+                <div class="foc">
+                    <label><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ></label>
+                </div>
+                <?php
+                $checked = "";
+            }
+            ?>
             <div class="foc">
                 <input type="submit" value="Inserisci" />
             </div>
@@ -67,36 +68,40 @@
             <div class="foc">
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
-            <div class="foc"><?php
+            <?php
                 $enable = $thisUserId != $userToModify['id'] ? "" : "readonly";
                 $disabled = $thisUserId != $userToModify['id'] ? "" : "disabled";
                 foreach ($userToModify['company'] as $companyId => $compData) {
                     $isCompanyAdminChecked = $compData['isCompanyAdmin'] ? "checked" : "";
                     ?>
+                <div class="foc">
                     Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
+                </div>
                 <?php } ?>
-            </div>
-            <div class="foc"><?php
-                if ($isAdmin || $isCompanyAdmin) {
-                    foreach ($futureShow as $oneShow) {
-                        $showChecked = isset($showUserMap[$userToModify['id']]) && in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
-                        ?>
-                        <input type="checkbox" id="show_<?php echo $disabled . $oneShow['id'] . $userToModify['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $showChecked; ?> <?php echo $disabled; ?>><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><br>
-                        <?php
-                        $showChecked = "";
-                    }
-                } else {
-                    foreach ($futureShow as $oneShow) {
-                        $showChecked = in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
-                        ?>
-                        <input type="checkbox" id="show_<?php echo $oneShow['id'] . $userToModify['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $showChecked; ?> ><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><br>
-                        <?php
-                        $showChecked = "";
-                    }
-                    $enable = "";
+            <?php
+            if ($isAdmin || $isCompanyAdmin) {
+                foreach ($futureShow as $oneShow) {
+                    $showChecked = isset($showUserMap[$userToModify['id']]) && in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
+                    ?>
+                    <div class="foc">
+                        <?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="show_<?php echo $disabled . $oneShow['id'] . $userToModify['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $showChecked; ?> <?php echo $disabled; ?>>
+                    </div>
+                    <?php
+                    $showChecked = "";
                 }
-                ?>
-            </div>
+            } else {
+                foreach ($futureShow as $oneShow) {
+                    $showChecked = in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
+                    ?>
+                    <div class="foc">
+                        <?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="show_<?php echo $oneShow['id'] . $userToModify['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $showChecked; ?> >
+                    </div>
+                    <?php
+                    $showChecked = "";
+                }
+                $enable = "";
+            }
+            ?>
             <div class="foc">
                 <input type="submit" value="Salva" />
             </div>
