@@ -21,7 +21,7 @@ function validateAddUser() {
     var password2 = document.forms["adduser"]["passwordvalidate"].value;
     var name = document.forms["adduser"]["name"].value;
     var login = document.forms["adduser"]["login"].value;
-    return validateAll(name, password, password2, login) && validatePassword(password, password2);
+    return validateAll(name, login) && validatePassword(password, password2);
 
 }
 
@@ -34,7 +34,7 @@ function validateUpdateUser(index) {
     if (password != "" && password2 != "") {
         validatePassword(password, password2);
     }
-    return validateAll(name, password, password2, login);
+    return validateAll(name, login);
 }
 function validatePassword(password, password2) {
     if (password == null || password == "") {
@@ -48,7 +48,7 @@ function validatePassword(password, password2) {
     }
 }
 
-function validateAll(name, password, password2, login) {
+function validateAll(name, login) {
     if (name == null || name == "") {
         alert("Inserisci un nome");
         return false;
@@ -56,6 +56,19 @@ function validateAll(name, password, password2, login) {
 
     if (login == null || login == "") {
         alert("Inserisci una login");
+        return false;
+    }
+    var pat = /^[a-z0-9]+$/;
+    if (pat.test(login) == false) {
+        alert('login può contenere solo caratteri minuscoli');
+        return false;
+    }
+}
+
+function validateAddCompany() {
+    var nameOfCompany = document.forms["addcompany"]["companyName"].value;
+    if (nameOfCompany == null || nameOfCompany == "") {
+        alert("Inserisci un nome della Compagnia");
         return false;
     }
 }

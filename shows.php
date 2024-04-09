@@ -20,7 +20,7 @@ $shows = new Shows();
 
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('i', 'd', 'u'))) {
-        $r = $shows->handleShows();
+        $shows->handleShows();
     }
 }
 if (filter_input(INPUT_GET, 'si') != null) {

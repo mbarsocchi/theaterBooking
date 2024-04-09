@@ -14,7 +14,7 @@ class Booking {
     function handleBooking() {
         switch (filter_input(INPUT_POST, 'f')) {
             case 'b':
-                $this->insertPreno(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'user'), filter_input(INPUT_POST, 'showId'));
+                $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'user'), filter_input(INPUT_POST, 'showId'));
                 break;
             case 'db':
                 $this->deletePreno(filter_input(INPUT_POST, 'id'));
@@ -61,8 +61,18 @@ class Booking {
         }
         return $returned;
     }
+    
+    private function validateField($name){
+        if (!isset($name) || $name == "") {
+            return "Il nome non può essere vuoto";
+        }
+    }
 
     function insertPreno($name, $userId, $id) {
+        $validate = $this->validateField($name);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $stmt = $this->db->prepare("SELECT id,posti FROM spettacoli WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -83,6 +93,7 @@ class Booking {
             $today = date(self::SQL_DATE_FORMAT);
             $stmt = $this->db->prepare("INSERT INTO prenotazioni (id_spettacolo, nome, id_user_ref, _ins) "
                     . "VALUES (?,?,?,?)");
+            $name = trim($name);
             $stmt->bind_param("isis", $idShow, $name, $userId, $today);
             $stmt->execute();
         }

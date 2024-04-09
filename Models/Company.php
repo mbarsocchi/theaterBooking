@@ -29,12 +29,23 @@ class Company {
             default:
                 break;
         }
-        return $r;
+        header('Location: company.php');
     }
+    private function validateField($name){
+        if (!isset($name) || $name == "") {
+            return "Il nome della compagnia non può essere vuoto";
+        }
 
+    }
+    
     function insertCompany($name, $arryOfUsers, $companyAdmin) {
+        $validate = $this->validateField($name);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $stmt = $this->db->prepare("INSERT INTO theatre_companies (name) "
                 . "VALUES (?)");
+        $name =trim($name);
         $stmt->bind_param("s", $name);
         $stmt->execute();
         $companyId = $stmt->insert_id;
@@ -52,6 +63,7 @@ class Company {
                 $stmt->bind_param("ii", $ci, $userID);
             }
             $stmt->execute();
+            $companyId = $stmt->insert_id;
         }
     }
 
@@ -63,9 +75,14 @@ class Company {
     }
 
     function updateCompany($companyId, $name, $arryOfUsers, $companyAdmin) {
+        $validate = $this->validateField($name);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $stmt = $this->db->prepare("UPDATE theatre_companies 
             SET name=?
             WHERE id=?");
+        $name=trim($name);
         $stmt->bind_param("si", $name, $companyId);
         $stmt->execute();
         $currentUserAndAdmin = $this->getUsersOfACompany($companyId);

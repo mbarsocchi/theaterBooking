@@ -27,7 +27,7 @@ class Users {
             default:
                 break;
         }
-        return $r;
+        header('Location: users.php');
     }
 
     function getUser($id) {
@@ -160,12 +160,30 @@ ORDER BY u.name ASC;");
         return $result;
     }
 
+    private function validateField($name, $user_login, $passwordClear) {
+        if (!isset($name) || $name == "") {
+            return "Il nome non può essere vuoto";
+        }
+        if (!preg_match('/^[a-z0-9]+$/i', $user_login)) {
+            return "La login deve essere tutta minuscola";
+        }
+    }
+
     function insertUser($name, $user_login, $passwordClear, $showsArray, $arrayOfcompany, $arrayOfiscompanyadmin) {
-        $stmt = $this->db->prepare("INSERT INTO users (name, user_login, password) "
+        $validate = $this->validateField($name, $user_login, $passwordClear);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
+        $stmt = $this->db->prepare("INSERT IGNORE INTO users (name, user_login, password) "
                 . "VALUES (?,?,?)");
         $hash = md5($passwordClear);
+        $name = trim($name);
+        $user_login = trim($user_login);
         $stmt->bind_param("sss", $name, $user_login, $hash);
         $stmt->execute();
+        if ($stmt->affected_rows == 0) {
+            return "Errore, Utente non inserito: Login già esistente";
+        }
         $userId = $stmt->insert_id;
         foreach ($showsArray as $showId) {
             $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
@@ -174,14 +192,10 @@ ORDER BY u.name ASC;");
             $stmt->bind_param("ii", $si, $userId);
             $stmt->execute();
         }
-        echo "company che vorrei dargli a userid: ".$userId;
-        print_r($arrayOfcompany);
-        echo "di queste sono admin";
-        print_r($arrayOfiscompanyadmin);
+
         foreach ($arrayOfcompany as $companyId) {
-            $companyAdminToInsert = in_array($companyId, $arrayOfiscompanyadmin)?1:0;
+            $companyAdminToInsert = in_array($companyId, $arrayOfiscompanyadmin) ? 1 : 0;
             $ci = intval($companyId);
-            echo "companyID: ".$ci." userId: ".$userId." isCompanyId:".$companyAdminToInsert;
             $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id, is_company_admin) "
                     . "VALUES (?,?,?)");
             $stmt->bind_param("iii", $ci, $userId, $companyAdminToInsert);
@@ -196,6 +210,10 @@ ORDER BY u.name ASC;");
     }
 
     function updateUser($userId, $name, $user_login, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
+        $validate = $this->validateField($name, $user_login, $passwordClear);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $currentCompaniesForUser = $this->getCompanyForUser($userId);
 
         foreach ($companyForThisUser as $companyId) {

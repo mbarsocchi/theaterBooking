@@ -16,13 +16,13 @@ class Shows {
         $r = null;
         switch (filter_input(INPUT_POST, 'f')) {
             case 'i':
-                $this->insertShow(filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'namei'), filter_input(INPUT_POST, 'locationi'), filter_input(INPUT_POST, 'detailsi'), filter_input(INPUT_POST, 'seatsi'), filter_input(INPUT_POST, 'userid'));
+                $r = $this->insertShow(filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'namei'), filter_input(INPUT_POST, 'locationi'), filter_input(INPUT_POST, 'detailsi'), filter_input(INPUT_POST, 'seatsi'), filter_input(INPUT_POST, 'userid'));
                 break;
             case 'd':
-                $r = $this->deleteShow(filter_input(INPUT_POST, 'id'));
+                $this->deleteShow(filter_input(INPUT_POST, 'id'));
                 break;
             case 'u':
-                $this->updateShow(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'location'), filter_input(INPUT_POST, 'details'), filter_input(INPUT_POST, 'seats'));
+                $r = $this->updateShow(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'location'), filter_input(INPUT_POST, 'details'), filter_input(INPUT_POST, 'seats'));
                 break;
             default:
                 break;
@@ -34,12 +34,25 @@ class Shows {
         }
         return $r;
     }
-
+    private function validateField($name, $seats){
+        if (!isset($name) || $name == "") {
+            return "Il nome non può essere vuoto";
+        }
+        if (!isset($seats)|| $seats =="" || filter_var($seats, FILTER_VALIDATE_INT)) {
+            return "Devi insererire un numero di posti a sedere";
+        }
+    }
+    
     function updateShow($id, $timestamp, $name, $location, $details, $seats) {
+        $validate = $this->validateField($name, $seats);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
         $stmt = $this->db->prepare("UPDATE spettacoli 
             SET nome=?, luogo=?, dettagli=?, data=?, posti=? 
             WHERE id=?");
+        $name = trim($name);
         $stmt->bind_param("ssssii", $name, $location, $details, $convertedDate, $seats, $id);
         return $stmt->execute();
     }
@@ -73,9 +86,14 @@ class Shows {
     }
 
     function insertShow($timestamp, $name, $location, $details, $seats, $userId) {
+        $validate = $this->validateField($name, $seats);
+        if (isset($validate)) {
+            echo "<h2>" . $validate . "</h2>";
+        }
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
         $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, dettagli, data, posti) "
                 . "VALUES (?,?,?,?,?)");
+        $name = trim($name);
         $stmt->bind_param("sssss", $name, $location, $details, $convertedDate, $seats);
         $stmt->execute();
         $showId = $stmt->insert_id;

@@ -29,13 +29,14 @@ CREATE TABLE `prenotazioni` (
         ON DELETE CASCADE
 ) DEFAULT CHARSET=latin1;
 
-CREATE TABLE `users` (
+CREATE TABLE `users2` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(512) NOT NULL,
   `user_login` varchar(512) NOT NULL,
   `password` varchar(40) NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_login` (`user_login`)
 ) DEFAULT CHARSET=latin1;
 
 CREATE TABLE `users_shows` (

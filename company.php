@@ -21,7 +21,7 @@ $loginData['thispage'] = "company";
 $company = new Company();
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('ac', 'uc', 'dc'))) {
-        $r = $company->handle();
+        $company->handle();
     }
 }
 

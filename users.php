@@ -21,7 +21,7 @@ $loginData['thispage'] = "user";
 $shows = new Shows();
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('au', 'uu', 'du'))) {
-        $r = $users->handle();
+        $users->handle();
     }
 }
 

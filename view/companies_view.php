@@ -12,17 +12,17 @@
     </h2>
     <?php if (!isset($companyToModify)) { ?>
         <h2>Inserisci nuova compagnia</h2>
-        <form name="adduser" method="post" onsubmit="return validateAddUser()">
+        <form name="addcompany" method="post" onsubmit="return validateAddCompany()">
             <input type="hidden" name="said" value= "<?php echo $thisUserId; ?>">
             <div class="foc">
                 <input type="hidden" name="f" value= "ac">
             </div>
             <div class="foc">
-                <input type="text" name="name" placeholder="Nome compagnia" value= "">
+                <input type="text" name="name" placeholder="Nome compagnia" id="companyName" value= "">
             </div>
             <?php foreach ($users as $user) { ?>
                 <div class="foc">
-                    <label><?php echo $user['name']; ?><input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="user[]" value="<?php echo $user['id']; ?>" ></label>
+                    <label><?php echo $user['name']; ?><input type="checkbox" id="insert_user_comapny_<?php echo $user['id']; ?>" name="user[]" value="<?php echo $user['id']; ?>" ></label>
                     <label>Amministratore compagnia <input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="companyAdmin[]" value="<?php echo $user['id']; ?>" >
                     </label>
                 </div>
@@ -33,12 +33,12 @@
         </form>
     <?php } else if (isset($companyToModify)) { ?>
         <a href="company.php"><h2>Inserisci nuova compagnia</h2></a>
-        <form name="update_company_<?php echo $companyToModify['id']; ?>" method="post" onsubmit="return validateUpdateUser(<?php echo $companyToModify['id']; ?>)" >
+        <form name="addcompany" method="post" onsubmit="return validateAddCompany()" >
             <input type="hidden" name="said" value= "<?php echo $thisUserId; ?>">
             <input type="hidden" name="id" value= "<?php echo $companyToModify['id']; ?>">
             <input type="hidden" name="f" value= "uc"> 
             <div class="foc">
-                <input type="text" name="name" value= "<?php echo $companyToModify['name']; ?>">
+                <input type="text" name="name" id="companyName" value= "<?php echo $companyToModify['name']; ?>">
             </div>
             <?php foreach ($users as $user) { 
                 $checked = isset($user['company'][$companyToModify['id']])?"checked":"";
