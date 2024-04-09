@@ -65,7 +65,7 @@ CREATE TABLE `auth_tokens` (
 
 CREATE TABLE `theatre_companies` (
     `id` integer(11) not null AUTO_INCREMENT,
-    `nome` text NOT NULL,
+    `name` text NOT NULL,
     PRIMARY KEY (`id`)
 );
 
@@ -80,18 +80,5 @@ CREATE TABLE `companies_users` (
         ON DELETE CASCADE,
   FOREIGN KEY (`user_id`)
         REFERENCES users (id)
-        ON DELETE CASCADE
-) DEFAULT CHARSET=latin1;
-
-CREATE TABLE `companies_shows` (
-    `id` integer(11) not null AUTO_INCREMENT,
-    `company_id` int(11) NOT NULL,
-    `show_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`company_id`)
-        REFERENCES theatre_companies (id)
-        ON DELETE CASCADE,
-  FOREIGN KEY (`show_id`)
-        REFERENCES spettacoli (id)
         ON DELETE CASCADE
 ) DEFAULT CHARSET=latin1;

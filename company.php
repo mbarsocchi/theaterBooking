@@ -27,16 +27,16 @@ if (filter_input(INPUT_POST, 'f') != null) {
 
 if ($loginData['isAdmin'] ){
     $data['companies'] = $company->getAllCompanies();
+    $data['users'] = $users->getAllUsers();
 }
 
 if (filter_input(INPUT_GET, 'cu') != null && 
-        filter_input(INPUT_POST, 'f')!= 'dc') {
+        filter_input(INPUT_POST, 'f') != 'dc') {
     $data['companyToModify'] = $company->getCompany(filter_input(INPUT_GET, 'cu'));
 }
 
 $data['isAdmin'] = $thisUser['access_level'] == 0;
 $data['isCompanyAdmin'] = $thisUser['is_company_admin'];
-$data['companies']= $thisUser['company'];
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
 $data['isAdmin'] = $thisUser['is_company_admin'];

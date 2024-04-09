@@ -30,11 +30,14 @@
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
 
-            <?php foreach ($companies as $companyId => $compData) { ?>
+            <?php foreach ($companies as $companyId => $compData) { 
+               ?>
                 <div class="foc">
-                    <label>Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" ></label>
+                    <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $user['id']; ?>" ></label>
+                    <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" ></label>
                 </div>
-            <?php } ?>
+                <?php
+            }?>
             <?php
             $checked = "checked";
             foreach ($futureShow as $oneShow) {
@@ -71,11 +74,16 @@
             <?php
                 $enable = $thisUserId != $userToModify['id'] ? "" : "readonly";
                 $disabled = $thisUserId != $userToModify['id'] ? "" : "disabled";
+                $hasMultipleCompany = count($userToModify['company'])>1;
                 foreach ($userToModify['company'] as $companyId => $compData) {
                     $isCompanyAdminChecked = $compData['isCompanyAdmin'] ? "checked" : "";
+                    $isInThisCompany = $compData['inThisCompany'] ? "checked" : "";
                     ?>
                 <div class="foc">
-                    Amministratore della compagnia <?php echo $compData['name']; ?><input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
+                    <?php if ($hasMultipleCompany) { ?>
+                        <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $companyId; ?>" <?php echo $isInThisCompany; ?> <?php echo $disabled; ?>></label>
+                    <?php } ?>
+                    Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
                 </div>
                 <?php } ?>
             <?php

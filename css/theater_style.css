@@ -70,7 +70,6 @@ input[type='checkbox']{
     width: 80px;
     vertical-align: middle;
     position: relative;
-    left: 5%;
 }    
 select {
     height: 80px;

@@ -1,5 +1,7 @@
 <?php
 
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Company.php';
+
 class Users {
 
     private $db;
@@ -11,13 +13,14 @@ class Users {
     function handle() {
         $r = null;
         $arryOfShows = isset($_POST['show']) ? $_POST['show'] : array();
+        $arrayOfcompany = isset($_POST['company']) ? $_POST['company'] : array();
         $arrayOfiscompanyadmin = isset($_POST['iscompanyadminArr']) ? $_POST['iscompanyadminArr'] : array();
         switch (filter_input(INPUT_POST, 'f')) {
             case 'au':
                 $r = $this->insertUser(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, filter_input(INPUT_POST, 'iscompanyadmin'), filter_input(INPUT_POST, 'said'));
                 break;
             case 'uu':
-                $r = $this->updateUser(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfiscompanyadmin, filter_input(INPUT_POST, 'iscompanyadmin'));
+                $r = $this->updateUser(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfiscompanyadmin, filter_input(INPUT_POST, 'iscompanyadmin'), $arrayOfcompany);
                 break;
             case 'du':
                 $this->deleteUser(filter_input(INPUT_POST, 'id'));
@@ -28,7 +31,7 @@ class Users {
     }
 
     function getUser($id) {
-        $stmt = $this->db->prepare("SELECT u.id, name, user_login, company_id, tc.nome, is_company_admin "
+        $stmt = $this->db->prepare("SELECT u.id, u.name, user_login, company_id, tc.name as companyname, is_company_admin "
                 . "FROM users u "
                 . "LEFT JOIN companies_users cu ON u.id = cu.user_id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
@@ -45,7 +48,7 @@ class Users {
             $result['company'] = array();
             foreach ($queryResults as $userData) {
                 if ($userData['is_company_admin'] !== null) {
-                    $result['company'][$userData['company_id']]['name'] = $userData['nome'];
+                    $result['company'][$userData['company_id']]['name'] = $userData['companyname'];
                     $result['company'][$userData['company_id']]['isCompanyAdmin'] = $userData['is_company_admin'];
                 }
             }
@@ -54,7 +57,7 @@ class Users {
     }
 
     function getUserFromLogin($name) {
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level, cu.is_company_admin,tc.nome as companyname,tc.id as companyid "
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
                 . "FROM users u "
                 . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
@@ -63,6 +66,7 @@ class Users {
         $stmt->execute();
         $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $r['is_company_admin'] = false;
+        $r['company'] = array();
         if (count($queryResults) == 0) {
             $r = null;
         } else {
@@ -82,11 +86,28 @@ class Users {
     }
 
     function getAllUsers() {
-        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
+        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, cu.is_company_admin,tc.name as companyname,tc.id as companyid  "
                 . "FROM users u "
+                . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
+                . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "ORDER BY u.name ASC;");
         $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $userUsedTemp = array();
+        foreach ($queryResults as $user) {
+            if (!in_array($user['id'], $userUsedTemp)) {
+                array_push($userUsedTemp, $user['id']);
+                $r[$user['id']]['id'] = $user['id'];
+                $r[$user['id']]['name'] = $user['name'];
+                $r[$user['id']]['user_login'] = $user['user_login'];
+            }
+            $r[$user['id']]['company'][$user['companyid']]['name'] = $user['companyname'];
+            $r[$user['id']]['company'][$user['companyid']]['is_company_admin'] = $user['is_company_admin'];
+        }
+        foreach ($r as $t) {
+            $result[] = $t;
+        }
+        return $result;
     }
 
     function getUsersInScope($id) {
@@ -110,15 +131,17 @@ class Users {
                 $companiesIds[] = $id;
             }
         }
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.is_company_admin
+        $implodedString = implode(',', $companiesIds);
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.company_id, cu.is_company_admin
 FROM companies_users cu 
 JOIN users u ON u.id = cu.user_id
-WHERE cu.company_id IN (?)
+WHERE cu.company_id IN (".$implodedString.") 
+GROUP by u.id 
 ORDER BY u.name ASC;");
-        $implodedString = implode(', ', $companiesIds);
-        $stmt->bind_param("s", $implodedString);
+
         $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $returned = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $returned;
     }
 
     function isAdmin($id) {
@@ -159,13 +182,14 @@ ORDER BY u.name ASC;");
             $stmt->bind_param("i", $adminId);
             $stmt->execute();
             $queryResult = $stmt->get_result();
+            $companiesArray = array();
             if ($queryResult->num_rows > 0) {
                 while ($row = $queryResult->fetch_assoc()) {
                     $companiesArray[] = $row["company_id"];
                     break;
                 }
             }
-            $companyAdminToInsert = $isCompanyAdmin == null? 0:1;
+            $companyAdminToInsert = $isCompanyAdmin == null ? 0 : 1;
             foreach ($companiesArray as $companyId) {
                 $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id, is_company_admin) "
                         . "VALUES (?,?,?)");
@@ -182,9 +206,33 @@ ORDER BY u.name ASC;");
         $stmt->execute();
     }
 
-    function updateUser($userId, $name, $user_login, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin) {
-        $currentShowsForUser = $this->getShowsForUser($userId);
+    function updateUser($userId, $name, $user_login, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
         $currentCompaniesForUser = $this->getCompanyForUser($userId);
+
+        foreach ($companyForThisUser as $companyId) {
+            if (!in_array($companyId, $currentCompaniesForUser['adminArray']) && !in_array($companyId, $currentCompaniesForUser['nonAdminArray'])) {
+                $compAdmin = in_array($companyId, $arrayOfiscompanyadmin) ? 1 : 0;
+                $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id,is_company_admin) "
+                        . "VALUES (?,?,?)");
+                $ci = intval($companyId);
+                $stmt->bind_param("iii", $ci, $userId, $compAdmin);
+                $stmt->execute();
+            }
+        }
+
+        $companyThatUserAlreadyHas = array_merge($currentCompaniesForUser['adminArray'], $currentCompaniesForUser['nonAdminArray']);
+        foreach ($companyThatUserAlreadyHas as $companyId) {
+            if (!in_array($companyId, $companyForThisUser)) {
+                $stmt = $this->db->prepare("DELETE FROM companies_users "
+                        . "WHERE company_id=? "
+                        . "AND user_id = ? ");
+                $ci = intval($companyId);
+                $stmt->bind_param("ii", $ci, $userId);
+                $stmt->execute();
+            }
+        }
+
+        $currentShowsForUser = $this->getShowsForUser($userId);
 
         if ($passwordClear != null & $passwordClear != "") {
             $stmt = $this->db->prepare("UPDATE users 
@@ -199,7 +247,7 @@ ORDER BY u.name ASC;");
             $stmt->bind_param("ssi", $name, $user_login, $userId);
         }
         $stmt->execute();
-
+        // add admin to company
         $toAddCompanyAdmin = array_unique(array_merge($currentCompaniesForUser['adminArray'], $arrayOfiscompanyadmin), SORT_REGULAR);
         foreach ($toAddCompanyAdmin as $theatre_company_id) {
             $stmt = $this->db->prepare("UPDATE companies_users 
@@ -210,14 +258,15 @@ ORDER BY u.name ASC;");
             $stmt->execute();
         }
 
-        $toRemoveCompanyAdmin = array_diff($currentCompaniesForUser['adminArray'],$arrayOfiscompanyadmin);
+        // remove admin to company
+        $toRemoveCompanyAdmin = array_diff($currentCompaniesForUser['adminArray'], $arrayOfiscompanyadmin);
         foreach ($toRemoveCompanyAdmin as $theatre_company_id) {
-        $stmt = $this->db->prepare("UPDATE companies_users 
+            $stmt = $this->db->prepare("UPDATE companies_users 
             SET is_company_admin=0
             WHERE user_id=? 
             AND company_id=?");
-        $stmt->bind_param("ii", $userId, $theatre_company_id);
-        $stmt->execute();
+            $stmt->bind_param("ii", $userId, $theatre_company_id);
+            $stmt->execute();
         }
 
         $toAddArr = array_diff($showsArray, $currentShowsForUser);
@@ -260,7 +309,7 @@ ORDER BY u.name ASC;");
                 . "FROM theatre_companies tc "
                 . "JOIN companies_users cu ON cu.company_id = tc.id "
                 . "WHERE cu.user_id = ? "
-                . "ORDER BY tc.nome ASC");
+                . "ORDER BY tc.name ASC");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result['adminArray'] = array();

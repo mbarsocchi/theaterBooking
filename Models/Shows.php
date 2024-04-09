@@ -91,12 +91,6 @@ class Shows {
         $stmt->execute();
 
         $companyIdArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        foreach ($companyIdArray as $companyId) {
-            $stmt = $this->db->prepare("INSERT INTO companies_shows (company_id,show_id) "
-                    . "VALUES (?,?)");
-            $stmt->bind_param("ii", $companyId, $showId);
-            $stmt->execute();
-        }
     }
 
     function retriveAllfutureShow($id) {
@@ -118,7 +112,7 @@ class Shows {
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "WHERE data >= ? "
-                . "AND s.ID IN  ($inCondition) "
+                . "AND s.ID IN  (".$inCondition.") "
                 . "ORDER BY data ASC");
         $stmt->bind_param("s", $now);
         $stmt->execute();
