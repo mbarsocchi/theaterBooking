@@ -29,15 +29,20 @@
             <div class="foc">
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
-
-            <?php foreach ($companies as $companyId => $compData) { 
-               ?>
+            <h2>Compagnie</h2>
+            <?php $hasMultipleCompany = count($companies)>1;
+            foreach ($companies as $companyId => $compData) { ?>
                 <div class="foc">
-                    <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $user['id']; ?>" ></label>
-                    <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="0" ></label>
+                     <?php if ($hasMultipleCompany) { ?>
+                        <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $compData['id']; ?>" ></label>
+                    <?php } else { ?>
+                        <input type="hidden" name="company[]" value= "<?php echo $compData['id']; ?>">
+                    <?php } ?>
+                    <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $compData['id']; ?>"></label>
                 </div>
                 <?php
             }?>
+            <h2>Spettacoli</h2>
             <?php
             $checked = "checked";
             foreach ($futureShow as $oneShow) {
@@ -71,6 +76,7 @@
             <div class="foc">
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
+            <h2>Compagnie</h2>
             <?php
                 $enable = $thisUserId != $userToModify['id'] ? "" : "readonly";
                 $disabled = $thisUserId != $userToModify['id'] ? "" : "disabled";
@@ -82,10 +88,13 @@
                 <div class="foc">
                     <?php if ($hasMultipleCompany) { ?>
                         <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $companyId; ?>" <?php echo $isInThisCompany; ?> <?php echo $disabled; ?>></label>
+                    <?php } else { ?>
+                        <input type="hidden" name="company[]" value= "<?php echo $companyId; ?>">
                     <?php } ?>
                     Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
                 </div>
                 <?php } ?>
+            <h2>Spettacoli</h2>
             <?php
             if ($isAdmin || $isCompanyAdmin) {
                 foreach ($futureShow as $oneShow) {

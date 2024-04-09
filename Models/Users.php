@@ -17,7 +17,7 @@ class Users {
         $arrayOfiscompanyadmin = isset($_POST['iscompanyadminArr']) ? $_POST['iscompanyadminArr'] : array();
         switch (filter_input(INPUT_POST, 'f')) {
             case 'au':
-                $r = $this->insertUser(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, filter_input(INPUT_POST, 'iscompanyadmin'), filter_input(INPUT_POST, 'said'));
+                $r = $this->insertUser(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfcompany, $arrayOfiscompanyadmin);
                 break;
             case 'uu':
                 $r = $this->updateUser(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfiscompanyadmin, filter_input(INPUT_POST, 'iscompanyadmin'), $arrayOfcompany);
@@ -135,7 +135,7 @@ class Users {
         $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.company_id, cu.is_company_admin
 FROM companies_users cu 
 JOIN users u ON u.id = cu.user_id
-WHERE cu.company_id IN (".$implodedString.") 
+WHERE cu.company_id IN (" . $implodedString . ") 
 GROUP by u.id 
 ORDER BY u.name ASC;");
 
@@ -160,7 +160,7 @@ ORDER BY u.name ASC;");
         return $result;
     }
 
-    function insertUser($name, $user_login, $passwordClear, $showsArray, $isCompanyAdmin, $adminId = null) {
+    function insertUser($name, $user_login, $passwordClear, $showsArray, $arrayOfcompany, $arrayOfiscompanyadmin) {
         $stmt = $this->db->prepare("INSERT INTO users (name, user_login, password) "
                 . "VALUES (?,?,?)");
         $hash = md5($passwordClear);
@@ -174,29 +174,18 @@ ORDER BY u.name ASC;");
             $stmt->bind_param("ii", $si, $userId);
             $stmt->execute();
         }
-        if ($adminId != null) {
-            $stmt = $this->db->prepare("SELECT company_id "
-                    . "FROM companies_users "
-                    . "WHERE user_id = ? "
-                    . "AND is_company_admin = 1");
-            $stmt->bind_param("i", $adminId);
+        echo "company che vorrei dargli a userid: ".$userId;
+        print_r($arrayOfcompany);
+        echo "di queste sono admin";
+        print_r($arrayOfiscompanyadmin);
+        foreach ($arrayOfcompany as $companyId) {
+            $companyAdminToInsert = in_array($companyId, $arrayOfiscompanyadmin)?1:0;
+            $ci = intval($companyId);
+            echo "companyID: ".$ci." userId: ".$userId." isCompanyId:".$companyAdminToInsert;
+            $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id, is_company_admin) "
+                    . "VALUES (?,?,?)");
+            $stmt->bind_param("iii", $ci, $userId, $companyAdminToInsert);
             $stmt->execute();
-            $queryResult = $stmt->get_result();
-            $companiesArray = array();
-            if ($queryResult->num_rows > 0) {
-                while ($row = $queryResult->fetch_assoc()) {
-                    $companiesArray[] = $row["company_id"];
-                    break;
-                }
-            }
-            $companyAdminToInsert = $isCompanyAdmin == null ? 0 : 1;
-            foreach ($companiesArray as $companyId) {
-                $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id, is_company_admin) "
-                        . "VALUES (?,?,?)");
-                $ci = intval($companyId);
-                $stmt->bind_param("iii", $ci, $userId, $companyAdminToInsert);
-                $stmt->execute();
-            }
         }
     }
 
