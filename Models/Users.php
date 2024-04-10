@@ -60,7 +60,7 @@ class Users {
         $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
                 . "FROM users u "
                 . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
-                . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
+                . "JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
         $stmt->execute();
@@ -132,9 +132,9 @@ class Users {
             }
         }
         $implodedString = implode(',', $companiesIds);
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.company_id, cu.is_company_admin
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.company_id, cu.is_company_admin 
 FROM companies_users cu 
-JOIN users u ON u.id = cu.user_id
+JOIN users u ON u.id = cu.user_id 
 WHERE cu.company_id IN (" . $implodedString . ") 
 GROUP by u.id 
 ORDER BY u.name ASC;");

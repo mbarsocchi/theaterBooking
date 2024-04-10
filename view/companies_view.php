@@ -23,7 +23,7 @@
             <?php foreach ($users as $user) { ?>
                 <div class="foc">
                     <label><?php echo $user['name']; ?><input type="checkbox" id="insert_user_comapny_<?php echo $user['id']; ?>" name="user[]" value="<?php echo $user['id']; ?>" ></label>
-                    <label>Amministratore compagnia <input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="companyAdmin[]" value="<?php echo $user['id']; ?>" >
+                    <label>Amministratore <input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="companyAdmin[]" value="<?php echo $user['id']; ?>" >
                     </label>
                 </div>
             <?php } ?>
@@ -46,7 +46,7 @@
                 ?>
                 <div class="foc">
                     <label><?php echo $user['name']; ?><input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="user[]" value="<?php echo $user['id']; ?>"  <?php echo $checked; ?>></label>
-                    <label>Amministratore compagnia <input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="companyAdmin[]" value="<?php echo $user['id']; ?>"  <?php echo $adminchecked; ?>>
+                    <label>Amministratore <input type="checkbox" id="insert_user_<?php echo $user['id']; ?>" name="companyAdmin[]" value="<?php echo $user['id']; ?>"  <?php echo $adminchecked; ?>>
                     </label>
                 </div>
             <?php } ?>
