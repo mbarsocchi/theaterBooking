@@ -7,7 +7,7 @@
 <div class="waper">
     <form name="login" method="post">
         <div class="foc">
-            <input type="text" name="username" class="form-control" placeholder="Username" value= "" autofocus>
+            <input type="text" name="username" class="form-control" placeholder="Username" value= "" style="text-transform: lowercase;" autofocus>
         </div>
         <div class="foc">
             <input type="password" name="password" class="form-control"  placeholder="Password" autocomplete="off" value= "" >

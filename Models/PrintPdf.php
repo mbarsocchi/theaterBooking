@@ -24,7 +24,8 @@ class PrintPdf {
                 $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_header_print.php');
                 $data['allBookings'] = $booking->getBookings($shows->retriveShowByShowIds($arrayOfShows));
                 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'print_view.php', $data);
-                $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php');
+                $footer['includeFooter'] = false;
+                $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php',$footer);
                 $html = $head->render() . $tmpl->render(). $foot->render();
                 $this->createPdf($html);
                 break;

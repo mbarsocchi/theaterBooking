@@ -59,8 +59,8 @@ class Users {
     function getUserFromLogin($name) {
         $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
                 . "FROM users u "
-                . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
-                . "JOIN theatre_companies tc ON tc.id = cu.company_id "
+                . "JOIN companies_users cu ON cu.user_id = u.id "
+                . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
         $stmt->execute();

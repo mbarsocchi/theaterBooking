@@ -60,7 +60,7 @@ function validateAll(name, login) {
     }
     var pat = /^[a-z0-9]+$/;
     if (pat.test(login) == false) {
-        alert('login può contenere solo caratteri minuscoli');
+        alert('login può contenere solo caratteri minuscoli e numeri. No spazi, no simboli');
         return false;
     }
 }

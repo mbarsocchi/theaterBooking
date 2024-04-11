@@ -30,7 +30,8 @@ if ($numberOfShows) {
     if ($numberOfShows == 1) {
         $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_header_print.php');
         $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'print_view.php', $data);
-        $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php');
+        $footer['includeFooter'] = false;
+        $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php', $footer);
         PrintPdf::createPdf($head->render() . $tmpl->render() . $foot->render());
     } else {
         $head = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_meta_head.php');
@@ -44,7 +45,8 @@ if ($numberOfShows) {
         $data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
         $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'print_list_view.php', $data);
         echo $tmpl->render();
-        $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php');
+        $footer['includeFooter'] = true;
+        $foot = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_foot.php', $footer);
         echo $foot->render();
     }
 }
