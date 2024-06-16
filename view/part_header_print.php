@@ -36,6 +36,7 @@
             }
             td {
                 padding: 15px;
+                font-size: 23px;
             }
             tr {
                 height: 40px;

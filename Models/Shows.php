@@ -16,7 +16,8 @@ class Shows {
         $r = null;
         switch (filter_input(INPUT_POST, 'f')) {
             case 'i':
-                $r = $this->insertShow(filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'namei'), filter_input(INPUT_POST, 'locationi'), filter_input(INPUT_POST, 'detailsi'), filter_input(INPUT_POST, 'seatsi'), filter_input(INPUT_POST, 'userid'));
+                $r = $this->insertShow(filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'namei'), filter_input(INPUT_POST, 'locationi'),
+                        filter_input(INPUT_POST, 'detailsi'), filter_input(INPUT_POST, 'seatsi'), filter_input(INPUT_POST, 'userid'), filter_input(INPUT_POST, 'company'));
                 break;
             case 'd':
                 $this->deleteShow(filter_input(INPUT_POST, 'id'));
@@ -34,15 +35,16 @@ class Shows {
         }
         return $r;
     }
-    private function validateField($name, $seats){
+
+    private function validateField($name, $seats) {
         if (!isset($name) || $name == "") {
             return "Il nome non può essere vuoto";
         }
-        if (!isset($seats)|| $seats =="" || filter_var($seats, FILTER_VALIDATE_INT)) {
+        if (!isset($seats) || $seats == "" || filter_var($seats, FILTER_VALIDATE_INT)) {
             return "Devi insererire un numero di posti a sedere";
         }
     }
-    
+
     function updateShow($id, $timestamp, $name, $location, $details, $seats) {
         $validate = $this->validateField($name, $seats);
         if (isset($validate)) {
@@ -58,7 +60,10 @@ class Shows {
     }
 
     function returnDataForSpettacoloId($id) {
-        $stmt = $this->db->prepare("SELECT * FROM spettacoli WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT s.*,tc.name as companyName "
+                . "FROM spettacoli s "
+                . "JOIN theatre_companies tc ON s.company_id = tc.id "
+                . "WHERE s.id = ?");
         $stmt->bind_param("s", $id);
         $stmt->execute();
         $r = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -85,23 +90,23 @@ class Shows {
         $stmt->execute();
     }
 
-    function insertShow($timestamp, $name, $location, $details, $seats, $userId) {
+    function insertShow($timestamp, $name, $location, $details, $seats, $userId, $companyId) {
         $validate = $this->validateField($name, $seats);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
         }
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
-        $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, dettagli, data, posti) "
-                . "VALUES (?,?,?,?,?)");
+        $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, company_id, dettagli, data, posti) "
+                . "VALUES (?,?,?,?,?,?)");
         $name = trim($name);
-        $stmt->bind_param("sssss", $name, $location, $details, $convertedDate, $seats);
+        $stmt->bind_param("ssisss", $name, $location, $companyId, $details, $convertedDate, $seats);
         $stmt->execute();
         $showId = $stmt->insert_id;
         $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
                 . "VALUES (?,?)");
         $stmt->bind_param("ii", $showId, $userId);
         $stmt->execute();
-        
+
         $stmt = $this->db->prepare("SELECT company_id FROM companies_users "
                 . "WHERE user_id = ? "
                 . "AND is_company_admin = 1");
@@ -111,7 +116,7 @@ class Shows {
         $companyIdArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    function retriveAllfutureShow($id) {
+    function retriveAllfutureShow($userId) {
         $now = date(self::SQL_DATE_FORMAT, time());
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
@@ -119,9 +124,44 @@ class Shows {
                 . "WHERE data >= ? "
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
-        $stmt->bind_param("si", $now, $id);
+        $stmt->bind_param("si", $now, $userId);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    function retriveAllfutureShowICanManage($userId) {
+        $now = date(self::SQL_DATE_FORMAT, time());
+        $stmt = $this->db->prepare("SELECT s.* FROM spettacoli s "
+                . "WHERE company_id IN (SELECT company_id from companies_users cu "
+                . "     WHERE cu.user_id = ?  "
+                . "     AND cu.is_company_admin = 1 "
+                . ")"
+                . "AND s.data >= ? "
+                . "ORDER BY data ASC");
+        $stmt->bind_param("is", $userId, $now);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    function getAllUsersForShows($showsArray) {
+        if (count($showsArray)){
+        $showIds = array_map(function ($o) {
+            return $o['id'];
+        }, $showsArray);
+        $inCondition = implode(',', $showIds);
+        $stmt = $this->db->prepare("SELECT us.user_id "
+                . "FROM users_shows us "
+                . "WHERE us.show_id "
+                . "IN (".$inCondition.") "
+                . "GROUP BY us.user_id ");
+        $stmt->execute();
+        $queryResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return array_map(function ($o) {
+            return $o['user_id'];
+        }, $queryResult);
+        } else {
+            return [];
+        }
     }
 
     function retriveShowByShowIds($arrayOfIds) {
@@ -130,7 +170,7 @@ class Shows {
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "WHERE data >= ? "
-                . "AND s.ID IN  (".$inCondition.") "
+                . "AND s.ID IN  (" . $inCondition . ") "
                 . "ORDER BY data ASC");
         $stmt->bind_param("s", $now);
         $stmt->execute();

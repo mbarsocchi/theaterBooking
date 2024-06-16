@@ -9,16 +9,17 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'C
 $login = new Login();
 $users = new Users();
 $comp = new Company();
+$shows = new Shows();
 
 $login->isAuth();
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
+$numberOfUsersInScope = count( $users->getUsersInScope($thisUser['id']));
 $loginData['isLogged'] = true;
 $loginData['isAdmin'] = $thisUser['access_level'] == 0;
-$loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
+$loginData['isCompanyAdmin'] = $numberOfUsersInScope> 1;
 $loginData['thispage'] = "user";
 
-$shows = new Shows();
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('au', 'uu', 'du'))) {
         $users->handle();
@@ -32,6 +33,8 @@ if ($loginData['isAdmin']) {
 } else {
     header('Location: booking.php');
 }
+$userCompanies = $users->getCompanyForUser($thisUser['id']);
+$data['companyICanAdmin'] = $userCompanies['adminArray'];
 
 foreach ($data['usersInScope'] as $element) {
     $usersIdInScope[] = $element['id'];
@@ -44,7 +47,7 @@ foreach ($thisUser['company'] as $compId => $compData) {
 
 if ($loginData['isAdmin']) {
     $data['companies'] = $comp->getAllCompanies();
-} else if ($thisUser['is_company_admin']) {
+} else if ($loginData['isCompanyAdmin']) {
     $data['companies'] = $comp->getallManagedCompany($thisUser['id']);
 }
 
@@ -56,7 +59,7 @@ if (filter_input(INPUT_GET, 'ui') != null &&
     $data['userToModify']['company'] = $comp->companyDataForUsesAndCompany($data['companies'], $data['userToModify']['company']);
 }
 $data['isAdmin'] = $thisUser['access_level'] == 0;
-$data['isCompanyAdmin'] = $thisUser['is_company_admin'];
+$data['isCompanyAdmin'] = $numberOfUsersInScope > 1;
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
 $data['showUserMap'] = $shows->getShowInUserScope($data['usersInScope']);

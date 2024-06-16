@@ -45,9 +45,22 @@
             <div class="foc">
                 <input type="text" name="seatsi" placeholder="Numero posti" value= "">
             </div>
+            <?php
+            $hasMultipleCompany = count($companies) > 1;
+            if ($hasMultipleCompany) {?>
+            <h2>Compagnie</h2>
+                <?php foreach ($companies as $companyId => $compData) {
+                    ?>
+                    <div class="foc">
+                        <label><?php echo $compData['name']; ?><input type="radio" id="user_to_company_<?php echo $companyId; ?>" name="company" value="<?php echo $compData['id']; ?>" ></label>
+                    </div>
+                <?php } ?>
+            <?php } else { ?>
+                <input type="hidden" name="company" id="oneonlycompany" value= "<?php echo $companies[0]['id']; ?>">
+            <?php } ?>
             <div class="foc"><input type="submit" value="inserisci" /></div>
         </form>
-    <?php } else if (isset($showToModify)) { ?>
+    <?php } else if (isset($showToModify)) {?>
         <a href="shows.php"><h2>Inserisci nuovo show</h2></a>
         <form name="showdate<?php echo $showToModify['id']; ?>" method="post">
             <input type="hidden" name="id" value= "<?php echo $showToModify['id']; ?>">
@@ -71,17 +84,20 @@
             </div>
             <div class="foc">
                 <input type="text" name="seats" value= "<?php echo $showToModify['posti']; ?>">
-            </div>
+            </div>    
+            <div class="foc">
+                Compagnia dello spettacolo: <?php echo $showToModify['companyName']; ?>
+            </div>  
             <div class="foc">
                 <input type="submit" value="Salva" style="display: inline-block;"/>             
             </div>
         </form>
-    <form name="delete<?php echo $showToModify['id']; ?>" method="post" onsubmit="return deleteShows(<?php echo $showToModify['id']; ?>)">
-        <input type="hidden" name="id" value= "<?php echo $showToModify['id']; ?>">
-        <input type="hidden" name="f" value= "d">
-        <div class="foc">
-            <input type="submit" value="Elimina" style="display: inline-block;" />
-        </div>
-    </form>
-<?php } ?>
+        <form name="delete<?php echo $showToModify['id']; ?>" method="post" onsubmit="return deleteShows(<?php echo $showToModify['id']; ?>)">
+            <input type="hidden" name="id" value= "<?php echo $showToModify['id']; ?>">
+            <input type="hidden" name="f" value= "d">
+            <div class="foc">
+                <input type="submit" value="Elimina" style="display: inline-block;" />
+            </div>
+        </form>
+    <?php } ?>
 </div>

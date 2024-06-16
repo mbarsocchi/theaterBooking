@@ -85,6 +85,12 @@ function subAddShow() {
     var name = document.forms["addshow"]["namei"].value;
     var seat = document.forms["addshow"]["seatsi"].value;
     var data = document.forms["addshow"]["timestamp"].value;
+    
+    if (data == null || data == "") {
+        alert("Inserisci una data");
+        return false;
+    }
+    
     if (name == null || name == "") {
         alert("Inserisci un nome");
         return false;
@@ -93,8 +99,9 @@ function subAddShow() {
         alert("Inserisci il numero di posti correttamente");
         return false;
     }
-    if (data == null || data == "") {
-        alert("Inserisci una data");
+    let hasOneCompany = typeof $('#oneonlycompany').val() != 'undefined';
+    if (!hasOneCompany && $('input:radio:checked').length == 0) {
+        alert("Seleziona almeno una compagnia");
         return false;
     }
 

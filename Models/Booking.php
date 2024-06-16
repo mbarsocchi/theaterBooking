@@ -1,20 +1,30 @@
 <?php
 
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'DateUtil.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Shows.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Users.php';
 
 class Booking {
-    const DATE_FORMAT ='d/m/y H:i';
-    const SQL_DATE_FORMAT= "y-m-d G:i:s";
+
+    const DATE_FORMAT = 'd/m/y H:i';
+    const SQL_DATE_FORMAT = "y-m-d G:i:s";
+
     private $db;
 
     public function __construct() {
         $this->db = Database::getConnection();
     }
 
-    function handleBooking() {
+    function handleBooking($myUserId) {
         switch (filter_input(INPUT_POST, 'f')) {
             case 'b':
-                $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'user'), filter_input(INPUT_POST, 'showId'));
+                $userIdRef = filter_input(INPUT_POST, 'user');
+                $showId = filter_input(INPUT_POST, 'showId');
+                if ($myUserId != $userIdRef && $this->userIsAdminOfShow($myUserId, $userIdRef, $showId)) {
+                    $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), $userIdRef, $showId);
+                } else if ($myUserId == $userIdRef) {
+                    $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), $userIdRef, $showId);
+                }
                 break;
             case 'db':
                 $this->deletePreno(filter_input(INPUT_POST, 'id'));
@@ -23,6 +33,16 @@ class Booking {
                 break;
         }
         header('Location: booking.php');
+    }
+
+    function userIsAdminOfShow($myUserId, $ref, $showId) {
+        $shows = new Shows();
+        $showData = $shows->returnDataForSpettacoloId($showId);
+        $users = new Users();
+        $c = $users->getCompanyForUser($ref);
+        $myC = $users->getCompanyForUser($myUserId);
+        $allCompanyOfRef = array_merge($c['adminArray'], $c['nonAdminArray']);
+        return in_array($showData['company_id'], $allCompanyOfRef) && in_array($showData['company_id'], $myC['adminArray']);
     }
 
     function updatePrenoWithGeneratedCode($id, $rifUserId, $code) {
@@ -61,8 +81,8 @@ class Booking {
         }
         return $returned;
     }
-    
-    private function validateField($name){
+
+    private function validateField($name) {
         if (!isset($name) || $name == "") {
             return "Il nome non può essere vuoto";
         }
@@ -99,7 +119,7 @@ class Booking {
         }
     }
 
-    function getBookings($showDates) {        
+    function getBookings($showDates) {
         $inCondition = $this->builtInCondition($showDates);
         $bookingsAll = $this->getBookingData($inCondition);
         $temp = $this->reorderPrenos($bookingsAll);
@@ -109,6 +129,7 @@ class Booking {
             $dateFormatted = $date->format(self::DATE_FORMAT);
             $bookingData[$dateFormatted]['id'] = $show['id'];
             $bookingData[$dateFormatted]['title'] = $show['nome'];
+            $bookingData[$dateFormatted]['companyId'] = $show['company_id'];
             $bookingData[$dateFormatted]['dayOfTheWeek'] = DateUtil::transformDay($date->format('N'));
             $bookingData[$dateFormatted]['occupiedSeats'] = isset($temp[$dateFormatted]) ? count($temp[$dateFormatted]['bookings']) : 0;
             $bookingData[$dateFormatted]['freeSeats'] = $show['posti'] - $bookingData[$dateFormatted]['occupiedSeats'];
@@ -139,7 +160,7 @@ class Booking {
                 . "LEFT JOIN spettacoli s ON s.id = p.id_spettacolo "
                 . "LEFT JOIN users u ON u.id = p.id_user_ref "
                 . "WHERE p.id_spettacolo IN ($idArrays) "
-                . "ORDER BY p.nome");
+                . "ORDER BY u.name,p.nome");
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }

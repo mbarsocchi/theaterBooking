@@ -1,7 +1,5 @@
 <?php
 
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'Company.php';
-
 class Users {
 
     private $db;
@@ -65,7 +63,6 @@ class Users {
         $stmt->bind_param("s", $name);
         $stmt->execute();
         $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $r['is_company_admin'] = false;
         $r['company'] = array();
         if (count($queryResults) == 0) {
             $r = null;
@@ -75,11 +72,8 @@ class Users {
             $r['user_login'] = $queryResults[0]['user_login'];
             $r['access_level'] = $queryResults[0]['access_level'];
             foreach ($queryResults as $userData) {
-                if ($userData['is_company_admin'] !== null) {
-                    $r['is_company_admin'] = $r['is_company_admin'] || $userData['is_company_admin'];
-                    $r['company'][$userData['companyid']]['name'] = $userData['companyname'];
-                    $r['company'][$userData['companyid']]['isCompanyAdmin'] = $userData['is_company_admin'];
-                }
+                $r['company'][$userData['companyid']]['name'] = $userData['companyname'];
+                $r['company'][$userData['companyid']]['isCompanyAdmin'] = $userData['is_company_admin'];
             }
         }
         return $r;
@@ -110,21 +104,18 @@ class Users {
         return $result;
     }
 
-    function getUsersInScope($id) {
-        $now = date('Y-m-d H:i:s');
-        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, u.access_level "
-                . "FROM users u "
-                . "JOIN users_shows us ON u.id = us.user_id "
-                . "WHERE show_id IN (SELECT show_id FROM users_shows us "
-                . "JOIN spettacoli s ON s.id = us.show_id "
-                . "WHERE user_id = ? "
-                . "AND s.data >= ?)"
-                . "ORDER BY u.name ASC;");
-        $stmt->bind_param("is", $id, $now);
+    function getUsersInScope($userid) {
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level "
+                . "FROM `companies_users` cu "
+                . "INNER JOIN companies_users cu2 ON cu2.company_id = cu.company_id "
+                . "JOIN users u ON u.id = cu2.user_id "
+                . "WHERE cu.user_id = ? "
+                . "AND cu.is_company_admin = 1;");
+        $stmt->bind_param("i", $userid);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
-
+    
     function getAllUsersByCompany($companiesArray) {
         foreach ($companiesArray as $id => $companyData) {
             if ($companyData['isCompanyAdmin']) {
@@ -204,6 +195,9 @@ ORDER BY u.name ASC;");
     }
 
     function deleteUser($id) {
+        $stmt = $this->db->prepare("DELETE FROM companies_users WHERE user_id=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
         $stmt = $this->db->prepare("DELETE FROM users WHERE id=?");
         $stmt->bind_param("i", $id);
         $stmt->execute();

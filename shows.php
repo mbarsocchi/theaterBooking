@@ -4,6 +4,7 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'R
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Company.php';
 
 $login = new Login();
 
@@ -11,9 +12,15 @@ $login->isAuth();
 
 $users = new Users();
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
+$companies = new Company();
+$data['companies'] = $companies->getallManagedCompany($thisUser['id']);  
+
 $loginData['isLogged'] = true;
-$loginData['isAdmin'] = $thisUser['access_level'] == 0;;
-$loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
+$loginData['isAdmin'] = $thisUser['access_level'] == 0;
+
+$iAmACompanyAdmin = count($data['companies'])>0;
+$loginData['isCompanyAdmin']= $iAmACompanyAdmin;
+$data['isCompanyAdmin']= $iAmACompanyAdmin;
 $loginData['thispage'] = "shows";
 
 $shows = new Shows();
@@ -35,7 +42,7 @@ if (isset($r) && isset($r['erromessage'])) {
 $data['isAdmin'] = $thisUser['access_level'] == 0;
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
-$data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
+$data['futureShow'] = $shows->retriveAllfutureShowICanManage($thisUser['id']);
 
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
 echo $tmpl->render();

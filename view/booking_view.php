@@ -7,18 +7,18 @@
                     ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
                 <?php } ?></select>
             <div class="mid-spacer"></div>
-        <?php } else { ?>
-            <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
+        <?php } else {  ?>
+            <input type="hidden" name="showId" value="<?php echo $t['id']; ?>"/>
         <?php } ?>
         <input type="hidden" name="f" value="b"/>
         <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome e cognome"/><br />
-        <?php if ($isAdmin || $isCompanyAdmin) { ?>
+        <?php if ($isAdmin ||  count($usersInScope)>1) { ?>
             Inserisci come: <select name="user" style="margin-bottom: 20px;">";
                 <?php
                 foreach ($usersInScope as $user) {
-                    if (strcasecmp($thisUserId, trim($user['id'])) == 0) {
-                        ?><option selected="selected" value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
-                    <?php } else { ?><option value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
+                    if (strcasecmp($thisUserId, trim($user['user_id'])) == 0) {
+                        ?><option selected="selected" value="<?php echo $user['user_id']; ?>"><?php echo $user['name']; ?></option>
+                    <?php } else { ?><option value="<?php echo $user['user_id']; ?>"><?php echo $user['name']; ?></option>
                     <?php
                     }
                 }
@@ -43,7 +43,7 @@
                 <?php foreach ($bookingData['bookings'] as $i => $bookingName) { ?>
                 <tr>
                     <td style="width:2%"><?php echo $i + 1; ?></td>
-            <?php if ($isAdmin || $isCompanyAdmin || $thisUserId == $bookingName['riferimentoId']) { ?>
+            <?php if ($isAdmin || in_array($bookingData['companyId'],$companyICanAdmin) || $thisUserId == $bookingName['riferimentoId']) { ?>
                         <td style="width:45%" class="no-right-brd"><?php echo $bookingName['name']; ?></td>
                         <td style="width:4%">    
                             <form name="delete_bookin_<?php echo $bookingName['id']; ?>" method="post" onsubmit="return confirmDeleteBooking()">

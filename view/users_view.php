@@ -103,6 +103,7 @@
             if ($isAdmin || $isCompanyAdmin) {
                 foreach ($futureShow as $oneShow) {
                     $showChecked = isset($showUserMap[$userToModify['id']]) && in_array($oneShow['id'], $showUserMap[$userToModify['id']]) ? "checked" : "";
+                    $disabled = ($thisUserId != $userToModify['id'] && in_array($oneShow['company_id'],$companyICanAdmin) ) ? "" : "disabled";
                     ?>
                     <div class="foc">
                         <?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="show_<?php echo $disabled . $oneShow['id'] . $userToModify['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $showChecked; ?> <?php echo $disabled; ?>>

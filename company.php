@@ -8,17 +8,18 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'L
 $login = new Login();
 
 $login->isAuth();
+$company = new Company();
 
 
 $users = new Users();
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $loginData['isLogged'] = true;
 $loginData['isAdmin'] = $thisUser['access_level'] == 0;
-$loginData['isCompanyAdmin'] = $thisUser['is_company_admin'];
+$userCompanies = $users->getCompanyForUser($thisUser['id']);
+$loginData['isCompanyAdmin'] = count($userCompanies['adminArray'])> 0;
 $loginData['thispage'] = "company";
 
 
-$company = new Company();
 if (filter_input(INPUT_POST, 'f') != null) {
     if (in_array(filter_input(INPUT_POST, 'f'), array('ac', 'uc', 'dc'))) {
         $company->handle();
@@ -36,10 +37,8 @@ if (filter_input(INPUT_GET, 'cu') != null &&
 }
 
 $data['isAdmin'] = $thisUser['access_level'] == 0;
-$data['isCompanyAdmin'] = $thisUser['is_company_admin'];
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
-$data['isAdmin'] = $thisUser['is_company_admin'];
 
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
 echo $tmpl->render();

@@ -180,9 +180,10 @@ class Company {
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    private function getUsersOfACompany($companyId) {
-        $stmt = $this->db->prepare("SELECT user_id,is_company_admin "
+    public function getUsersOfACompany($companyId) {
+        $stmt = $this->db->prepare("SELECT user_id,u.name, is_company_admin "
                 . "FROM companies_users cu "
+                . "JOIN users u ON u.id = cu.user_id "
                 . "WHERE cu.company_id = ?;");
         $stmt->bind_param("i", $companyId);
         $stmt->execute();
