@@ -8,7 +8,7 @@
                 <?php } ?></select>
             <div class="mid-spacer"></div>
         <?php } else {  ?>
-            <input type="hidden" name="showId" value="<?php echo $t['id']; ?>"/>
+            <input type="hidden" name="showId" value="<?php echo array_values($allBookings)[0]['id']; ?>"/>
         <?php } ?>
         <input type="hidden" name="f" value="b"/>
         <input type="text" name="name" size="35" autofocus style="margin-bottom: 20px;width:100%" placeholder="Nome e cognome"/><br />

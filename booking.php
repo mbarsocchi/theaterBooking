@@ -1,19 +1,18 @@
 <?php
 
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'RenderTemplate.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Company.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Booking.php';
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
+
 
 $shows = new Shows();
 $booking = new Booking();
-$login = new Login();
 $users = new Users();
 $company = new Company();
 
-$login->isAuth();
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 
 if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, 'f'), array('b', 'db', 'ub'))) {

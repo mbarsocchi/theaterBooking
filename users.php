@@ -1,17 +1,16 @@
 <?php
 
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'RenderTemplate.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Shows.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Users.php';
-include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Login.php';
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'Company.php';
 
-$login = new Login();
+
 $users = new Users();
 $comp = new Company();
 $shows = new Shows();
 
-$login->isAuth();
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $numberOfUsersInScope = count( $users->getUsersInScope($thisUser['id']));

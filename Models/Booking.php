@@ -20,14 +20,12 @@ class Booking {
             case 'b':
                 $userIdRef = filter_input(INPUT_POST, 'user');
                 $showId = filter_input(INPUT_POST, 'showId');
-                if ($myUserId != $userIdRef && $this->userIsAdminOfShow($myUserId, $userIdRef, $showId)) {
-                    $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), $userIdRef, $showId);
-                } else if ($myUserId == $userIdRef) {
+                if ($myUserId != $userIdRef && $this->canIAddOnBehalf($myUserId, $userIdRef, $showId) || $myUserId == $userIdRef) {
                     $r = $this->insertPreno(filter_input(INPUT_POST, 'name'), $userIdRef, $showId);
                 }
                 break;
             case 'db':
-                $this->deletePreno(filter_input(INPUT_POST, 'id'));
+                $this->deletePreno($myUserId, filter_input(INPUT_POST, 'id'));
                 break;
             case 'ub':
                 break;
@@ -35,14 +33,17 @@ class Booking {
         header('Location: booking.php');
     }
 
-    function userIsAdminOfShow($myUserId, $ref, $showId) {
+    private function canIAddOnBehalf($myUserId, $ref, $showId) {
         $shows = new Shows();
         $showData = $shows->returnDataForSpettacoloId($showId);
+        $atemp[]['id'] = $showId;
+        $allUserOfAShow = $shows->getAllUsersForShows($atemp);
         $users = new Users();
         $c = $users->getCompanyForUser($ref);
         $myC = $users->getCompanyForUser($myUserId);
         $allCompanyOfRef = array_merge($c['adminArray'], $c['nonAdminArray']);
-        return in_array($showData['company_id'], $allCompanyOfRef) && in_array($showData['company_id'], $myC['adminArray']);
+        $r = in_array($ref, $allUserOfAShow) && in_array($showData['company_id'], $allCompanyOfRef) && in_array($showData['company_id'], $myC['adminArray']);
+        return $r;
     }
 
     function updatePrenoWithGeneratedCode($id, $rifUserId, $code) {
@@ -61,12 +62,22 @@ class Booking {
         return $returned;
     }
 
-    function deletePreno($id) {
-        $stmt = $this->db->prepare("DELETE FROM prenotazioni WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
+    function deletePreno($myUserId, $id) {
+        if ($this->canIDeleteThisPreno($myUserId, $id)) {
+            $stmt = $this->db->prepare("DELETE FROM prenotazioni WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+        }
     }
 
+    private function canIDeleteThisPreno($myUserId, $prenoid){
+        // TODO 
+        // prendi lo $showId e il $ref di questa $prenoid
+        // check che il $ref sia $myUserId oppure
+        // $result = || canIAddOnBehalf($myUserId, $ref, $showId);
+        return true;
+    }
+    
     function updatePrenoName($namePost, $idPost) {
         if (isset($namePost) && isset($idPost)) {
             $currentUserName = $current_user->user_login;

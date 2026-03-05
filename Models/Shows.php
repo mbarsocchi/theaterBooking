@@ -145,20 +145,20 @@ class Shows {
 
     function getAllUsersForShows($showsArray) {
         if (count($showsArray)){
-        $showIds = array_map(function ($o) {
-            return $o['id'];
-        }, $showsArray);
-        $inCondition = implode(',', $showIds);
-        $stmt = $this->db->prepare("SELECT us.user_id "
-                . "FROM users_shows us "
-                . "WHERE us.show_id "
-                . "IN (".$inCondition.") "
-                . "GROUP BY us.user_id ");
-        $stmt->execute();
-        $queryResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        return array_map(function ($o) {
-            return $o['user_id'];
-        }, $queryResult);
+            $showIds = array_map(function ($o) {
+                return $o['id'];
+            }, $showsArray);
+            $inCondition = implode(',', $showIds);
+            $stmt = $this->db->prepare("SELECT us.user_id "
+                    . "FROM users_shows us "
+                    . "WHERE us.show_id "
+                    . "IN (".$inCondition.") "
+                    . "GROUP BY us.user_id ");
+            $stmt->execute();
+            $queryResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            return array_map(function ($o) {
+                return $o['user_id'];
+            }, $queryResult);
         } else {
             return [];
         }

@@ -1,4 +1,5 @@
 <?php
+
 include_once __DIR__ . DIRECTORY_SEPARATOR . 'Database.php';
 
 class Login {
@@ -108,6 +109,7 @@ class Login {
             }
         }
         $expireTimestamp = time();
+        $expireTimestamp =date('Y-m-d');
         $stmt = $this->db->prepare("DELETE "
                 . "FROM auth_tokens "
                 . "WHERE expires < ? "
@@ -116,13 +118,14 @@ class Login {
         $stmt->execute();
     }
 
-    public function isAuth($redirect = true) {
+    public function isAuth() {
+        $caller = basename($_SERVER['SCRIPT_NAME']);
         @session_start();
         if (!empty($_COOKIE['remember'])) {
             list($selector, $authenticator) = explode(':', $_COOKIE['remember']);
             $this->canReAuthOnPageLoad($selector, $authenticator);
         }
-        if ($redirect && (!isset($_SESSION['session_user']) || $_SESSION['session_user'] == null || $_SESSION['session_user'] == "")) {
+        if ($caller !="index.php" && (!isset($_SESSION['session_user']) || $_SESSION['session_user'] == null || $_SESSION['session_user'] == "")) {
             header('location: index.php');
         }
     }
@@ -164,3 +167,6 @@ class Login {
     }
 
 }
+
+$login = new Login();
+$login->isAuth();
