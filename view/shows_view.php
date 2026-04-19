@@ -57,7 +57,7 @@
                 <?php } ?>
             <?php } else { ?>
                 <div class="foc">
-                    <label><?php echo$companies[0]['name']; ?><input type="radio" id="user_to_company_<?php echo $companies[0]['id']; ?>" name="company" value="<?php echo $companies[0]['id']; ?>" disabled checked></label>
+                    <label><?php echo$companies[0]['name']; ?><input type="radio" id="user_to_company_<?php echo $companies[0]['id']; ?>" name="company" value="<?php echo $companies[0]['id']; ?>" readonly checked></label>
                 </div>
             <?php } ?>
             <div class="foc"><input type="submit" value="inserisci" /></div>

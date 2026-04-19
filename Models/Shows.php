@@ -40,7 +40,7 @@ class Shows {
         if (!isset($name) || $name == "") {
             return "Il nome non può essere vuoto";
         }
-        if (!isset($seats) || $seats == "" || filter_var($seats, FILTER_VALIDATE_INT)) {
+        if (!isset($seats) || $seats == "" || !filter_var($seats, FILTER_VALIDATE_INT)) {
             return "Devi insererire un numero di posti a sedere";
         }
     }
