@@ -24,6 +24,9 @@
                 <input type="text" name="login" placeholder="Login" value= "">
             </div>
             <div class="foc">
+                <input type="text" name="email" placeholder="Email" value= "">
+            </div>
+            <div class="foc">
                 <input type="password" name="password" placeholder="Password" value= "">  
             </div> 
             <div class="foc">
@@ -67,12 +70,19 @@
             <input type="hidden" name="id" value= "<?php echo $userToModify['id']; ?>">
             <input type="hidden" name="f" value= "uu"> 
             <div class="foc">
+                Nome per esteso
                 <input type="text" name="name" value= "<?php echo $userToModify['name']; ?>">
             </div>
             <div class="foc">
+                Login
                 <input type="text" name="login" value= "<?php echo $userToModify['user_login']; ?>">
             </div>
             <div class="foc">
+                Email
+                <input type="text" name="email" placeholder="Email" value= "<?php echo $userToModify['email']; ?>">
+            </div>
+            <div class="foc">
+                Password
                 <input type="password" name="password" placeholder="Nuova Password" value= "">
             </div>
             <div class="foc">
