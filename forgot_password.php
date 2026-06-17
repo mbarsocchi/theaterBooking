@@ -10,8 +10,8 @@ if (isset($_POST['password']) && isset($_POST['password-confirm'])) {
     $password = $_POST['password'];
     $passwordConfirm = $_POST['password-confirm'];
     if ($password === $passwordConfirm) {
-        if (isset($_POST['token'])) {
-            $token = $_POST['token'];
+        if (isset($_GET['token'])) {
+            $token = $_GET['token'];
             if ($user->validate_reset_token($token)) {
                 $user->update_password($token, $password);
                 $data['msg'] = "La tua password è stata reimpostata con successo.";
