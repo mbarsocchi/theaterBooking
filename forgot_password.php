@@ -40,7 +40,7 @@ if (isset($_POST['password']) && isset($_POST['password-confirm'])) {
         // Store the token in the database associated with the user's email
         $user->store_reset_token($email, $token);
         // Send the email with the reset link
-        $user->send_reset_email($_SERVER['HTTP_HOST'], $email, $token);
+        $user->send_reset_email($_SERVER['HTTP_REFERER'], $email, $token);
     } 
     $data['msg'] = "Se la tua email è presente nel nostro sistema, riceverai un link per reimpostare la password.";
     $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);

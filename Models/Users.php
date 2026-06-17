@@ -100,7 +100,7 @@ class Users {
     }
 
     function send_reset_email($host, $email, $token) {
-        $reset_link = $host . "/forgot_password.php?token=" . $token;
+        $reset_link = $host . "?token=" . $token;
         $subject = "Richiesta di reset della password";
         $message = "Clicka qui per reimpostare la password: " . $reset_link;
         mail($email, $subject, $message);
