@@ -62,7 +62,7 @@ class Users {
     function getUserFromLogin($name) {
         $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
                 . "FROM users u "
-                . "JOIN companies_users cu ON cu.user_id = u.id "
+                . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
@@ -94,7 +94,7 @@ class Users {
     }
 
     function store_reset_token($email, $token) {
-        $stmt = $this->db->prepare("UPDATE users SET reset_token = ? WHERE email = ?");
+        $stmt = $this->db->prepare("UPDATE users SET reset_token = ?, _updated_at=NOW() WHERE email = ?");
         $stmt->bind_param("ss", $token, $email);
         $stmt->execute();
     }
@@ -202,7 +202,7 @@ ORDER BY u.name ASC;");
             echo "<h2>" . $validate . "</h2>";
         }
         $stmt = $this->db->prepare("INSERT IGNORE INTO users (name, user_login, email, password) "
-                . "VALUES (?,?,?,?,?)");
+                . "VALUES (?,?,?,?)");
         $hash = md5($passwordClear);
         $name = trim($name);
         $user_login = trim($user_login);
@@ -240,7 +240,7 @@ ORDER BY u.name ASC;");
         $stmt->execute();
     }
 
-    function updateUser($userId, $name, $email, $user_login, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
+    function updateUser($userId, $name, $user_login, $email, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
         $validate = $this->validateField($name, $user_login, $passwordClear);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
@@ -274,15 +274,15 @@ ORDER BY u.name ASC;");
 
         if ($passwordClear != null & $passwordClear != "") {
             $stmt = $this->db->prepare("UPDATE users 
-            SET name=?, user_login=?, email=?, password=?
+            SET name=?, user_login=?, email=?, password=?, _updated_at=NOW()
             WHERE id=?");
             $hash = md5($passwordClear);
             $stmt->bind_param("ssssi", $name, $user_login, $email, $hash, $userId);
         } else {
             $stmt = $this->db->prepare("UPDATE users 
-            SET name=?, email=?, user_login=?
+            SET name=?, user_login=?, email=?, _updated_at=NOW()
             WHERE id=?");
-            $stmt->bind_param("sssi", $name, $email, $user_login, $userId);
+            $stmt->bind_param("sssi", $name, $user_login, $email, $userId);
         }
         $stmt->execute();
         // add admin to company

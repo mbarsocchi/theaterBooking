@@ -14,6 +14,8 @@ $users = new Users();
 $company = new Company();
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
+$visibilityUser = [];
+$t = [];
 
 if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, 'f'), array('b', 'db', 'ub'))) {
     $booking->handleBooking($thisUser['id']);
@@ -25,13 +27,11 @@ $allUsersForShows = $shows->getAllUsersForShows($futureShows);
 $userCompanies = $users->getCompanyForUser($thisUser['id']);
 $data['companyICanAdmin'] = $userCompanies['adminArray'];
 $data['usersInScope'] = [];
-$visibilityUser = [];
 foreach ($futureShows as $show) {
     if (in_array($show['company_id'], $userCompanies['adminArray'])) {
         $visibilityUser[$show['company_id']] = $company->getUsersOfACompany($show['company_id']);
     }
 }
-$t = [];
 foreach ($visibilityUser as $companyId => $allUsersOfACompany) {
    foreach ($allUsersOfACompany as $o){
        if (in_array($o['user_id'], $allUsersForShows) && ! isset($t[$o['user_id']]) ){
