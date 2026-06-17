@@ -10,4 +10,5 @@
             <button type="submit" class="btn btn-block">Invia nuova password</button>
         </div>
     </form>
+    Torna alla <a href="index.php">pagina di login</a>
 </div>

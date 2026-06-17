@@ -38,11 +38,9 @@
                     <?php if ($hasMultipleCompany) { ?>
                         <div class="foc">
                             <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $compData['id']; ?>" ></label>
-                        </div>
                     <?php } else { ?>
                         <input type="hidden" name="company[]" value= "<?php echo $compData['id']; ?>">
                     <?php } ?>
-                <div class="foc">        
                     <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $compData['id']; ?>"></label>
                 </div>
                 <?php
@@ -100,11 +98,9 @@
                     <?php if ($hasMultipleCompany) { ?>
                     <div class="foc">
                         <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $companyId; ?>" <?php echo $isInThisCompany; ?> <?php echo $disabled; ?>></label>
-                     </div>
                     <?php } else { ?>
                         <input type="hidden" name="company[]" value= "<?php echo $companyId; ?>">
                     <?php } ?>
-                <div class="foc">        
                     Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
                 </div>
                 <?php } ?>

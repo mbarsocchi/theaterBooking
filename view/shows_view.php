@@ -46,8 +46,8 @@
                 <input type="text" name="seatsi" placeholder="Numero posti" value= "">
             </div>
             <?php
-            $hasMultipleCompany = count($companies) > 1;
-            if ($hasMultipleCompany) {?>
+            $countCompanies = count($companies);
+            if ($countCompanies > 1) {?>
             <h2>Compagnie</h2>
                 <?php foreach ($companies as $companyId => $compData) {
                     ?>
@@ -55,9 +55,9 @@
                         <label><?php echo $compData['name']; ?><input type="radio" id="user_to_company_<?php echo $companyId; ?>" name="company" value="<?php echo $compData['id']; ?>" ></label>
                     </div>
                 <?php } ?>
-            <?php } else { ?>
+            <?php } else if ($countCompanies === 1) { ?>
                 <div class="foc">
-                    <label><?php echo$companies[0]['name']; ?><input type="radio" id="user_to_company_<?php echo $companies[0]['id']; ?>" name="company" value="<?php echo $companies[0]['id']; ?>" readonly checked></label>
+                    <label><?php echo $companies[0]['name']; ?><input type="radio" id="user_to_company_<?php echo $companies[0]['id']; ?>" name="company" value="<?php echo $companies[0]['id']; ?>" readonly checked></label>
                 </div>
             <?php } ?>
             <div class="foc"><input type="submit" value="inserisci" /></div>

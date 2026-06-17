@@ -10,7 +10,27 @@ if (isset($_POST['password']) && isset($_POST['password-confirm'])) {
     $password = $_POST['password'];
     $passwordConfirm = $_POST['password-confirm'];
     if ($password === $passwordConfirm) {
-
+        if (isset($_POST['token'])) {
+            $token = $_POST['token'];
+            if ($user->validate_reset_token($token)) {
+                $user->update_password($token, $password);
+                $data['msg'] = "La tua password è stata reimpostata con successo.";
+                $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
+                echo $fpv->render();
+            } else {
+                $data['msg'] = "Token non valido o scaduto.";
+                $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
+                echo $fpv->render();
+            }
+        } else {
+            $data['msg'] = "Token mancante.";
+            $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
+            echo $fpv->render();
+        }
+    } else {
+        $data['msg'] = "Le password non corrispondono.";
+        $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
+        echo $fpv->render();
     }
 }else if (isset($_POST['email'])) {
     $email = $_POST['email'];
@@ -22,7 +42,8 @@ if (isset($_POST['password']) && isset($_POST['password-confirm'])) {
         // Send the email with the reset link
         $user->send_reset_email($_SERVER['HTTP_HOST'], $email, $token);
     } 
-    $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_emailsent_view.php');
+    $data['msg'] = "Se la tua email è presente nel nostro sistema, riceverai un link per reimpostare la password.";
+    $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
     echo $fpv->render();
 }else if (isset($_GET['token'])) {
     $token = $_GET['token'];
@@ -30,7 +51,8 @@ if (isset($_POST['password']) && isset($_POST['password-confirm'])) {
         $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_password_view.php');
         echo $fpv->render();
     } else {
-        $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_pws_invalid_token.php');
+        $data['msg'] = "Token non valido o scaduto.";
+        $fpv = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'forgot_psw_msg.php', $data);
         echo $fpv->render();
     }
 }else {

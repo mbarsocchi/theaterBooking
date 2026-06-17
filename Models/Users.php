@@ -326,6 +326,13 @@ ORDER BY u.name ASC;");
         }
     }
 
+    function update_password($token, $new_password) {
+        $stmt = $this->db->prepare("UPDATE users SET password = ?, reset_token = NULL, _updated_at=NOW() WHERE reset_token = ?");
+        $hash = md5($new_password);
+        $stmt->bind_param("ss", $hash, $token);
+        $stmt->execute();
+    }
+    
     function getShowsForUser($userId) {
         $result = array();
         $stmt = $this->db->prepare("SELECT s.id "
