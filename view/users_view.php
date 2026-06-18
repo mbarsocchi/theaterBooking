@@ -24,7 +24,7 @@
                 <input type="text" name="login" placeholder="Login" value= "">
             </div>
             <div class="foc">
-                <input type="text" name="email" placeholder="Email" value= "">
+                <input type="email" name="email" placeholder="Email" value= "">
             </div>
             <div class="foc">
                 <input type="password" name="password" placeholder="Password" value= "">  
@@ -77,7 +77,7 @@
             </div>
             <div class="foc">
                 Email
-                <input type="text" name="email" placeholder="Email" value= "<?php echo $userToModify['email']; ?>">
+                <input type="email" name="email" placeholder="Email" value= "<?php echo $userToModify['email']; ?>">
             </div>
             <div class="foc">
                 Password
