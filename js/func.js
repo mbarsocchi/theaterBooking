@@ -21,6 +21,13 @@ function validateAddUser() {
     var password2 = document.forms["adduser"]["passwordvalidate"].value;
     var name = document.forms["adduser"]["name"].value;
     var login = document.forms["adduser"]["login"].value;
+    var email = document.forms["adduser"]["email"].value;   
+    if (email) {
+        if (!validateEmail(email)) {
+            alert("Inserisci un'email valida");
+            return false;
+        }   
+    }
     return validateAll(name, login) && validatePassword(password, password2);
 
 }
@@ -71,6 +78,48 @@ function validateAddCompany() {
         alert("Inserisci un nome della Compagnia");
         return false;
     }
+}
+
+function validateForgotPassword() {
+    var form = document.forms["forgot_password"] || document.forms["forgot_password_email"];
+    if (!form) {
+        return true;
+    }
+
+    if (form.name === "forgot_password_email") {
+        var email = form["email"].value;
+        if (email == null || email == "") {
+            alert("Inserisci un'email");
+            return false;
+        }
+        if (!validateEmail(email)) {
+            alert("Inserisci un'email valida");
+            return false;
+        }
+        return true;
+    }
+
+    var password = form["password"].value;
+    var passwordConfirm = form["password-confirm"].value;
+
+    if (password == null || password == "") {
+        alert("Inserisci una nuova password");
+        return false;
+    }
+    if (passwordConfirm == null || passwordConfirm == "") {
+        alert("Riscrivi la password nel campo di conferma");
+        return false;
+    }
+    if (password !== passwordConfirm) {
+        alert("Le due password devono essere uguali");
+        return false;
+    }
+    return true;
+}
+
+function validateEmail(email) {
+    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
 }
 
 function validatePrint() {

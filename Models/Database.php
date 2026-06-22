@@ -12,7 +12,7 @@ class Database {
         include_once(__DIR__ . '/../config.php');
         if (empty(self::$conn)) {
             try {
-                self::$conn = new mysqli($servername, $username, $password, $dbname);
+                self::$conn = new mysqli($dbHost, $username, $password, $dbname);
             } catch (PDOException $error) {
                 echo $error->getMessage();
             }

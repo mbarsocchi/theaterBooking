@@ -10,10 +10,14 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'Models' . DIRECTORY_SEPARATOR . 'C
 $users = new Users();
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $companies = new Company();
-$data['companies'] = $companies->getallManagedCompany($thisUser['id']);  
-
 $loginData['isLogged'] = true;
 $loginData['isAdmin'] = $thisUser['access_level'] == 0;
+
+if ($loginData['isAdmin']) {
+    $data['companies'] = $companies->getAllCompanies();
+} else if ($loginData['isCompanyAdmin']) {
+    $data['companies'] = $companies->getallManagedCompany($thisUser['id']);
+}
 
 $iAmACompanyAdmin = count($data['companies'])>0;
 $loginData['isCompanyAdmin']= $iAmACompanyAdmin;

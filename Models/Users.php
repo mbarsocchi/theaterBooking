@@ -13,23 +13,27 @@ class Users {
         $arryOfShows = isset($_POST['show']) ? $_POST['show'] : array();
         $arrayOfcompany = isset($_POST['company']) ? $_POST['company'] : array();
         $arrayOfiscompanyadmin = isset($_POST['iscompanyadminArr']) ? $_POST['iscompanyadminArr'] : array();
-        switch (filter_input(INPUT_POST, 'f')) {
-            case 'au':
-                $r = $this->insertUser(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfcompany, $arrayOfiscompanyadmin);
-                break;
-            case 'uu':
-                $r = $this->updateUser(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfiscompanyadmin, filter_input(INPUT_POST, 'iscompanyadmin'), $arrayOfcompany);
-                break;
-            case 'du':
-                $this->deleteUser(filter_input(INPUT_POST, 'id'));
-            default:
-                break;
+        if ($_POST && isset($_POST['f'])) {
+            switch (filter_input(INPUT_POST, 'f')) {
+                case 'au':
+                    $email = filter_input(INPUT_POST, 'email') ? filter_input(INPUT_POST, 'email') : null;
+                    $r = $this->insertUser(filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'), $email, filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfcompany, $arrayOfiscompanyadmin);
+                    break;
+                case 'uu':
+                    $email = filter_input(INPUT_POST, 'email') ? filter_input(INPUT_POST, 'email') : null;
+                    $r = $this->updateUser(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'login'),$email, filter_input(INPUT_POST, 'password'), $arryOfShows, $arrayOfiscompanyadmin, filter_input(INPUT_POST, 'iscompanyadmin'), $arrayOfcompany);
+                    break;
+                case 'du':
+                    $this->deleteUser(filter_input(INPUT_POST, 'id'));
+                default:
+                    break;
+            }
         }
         header('Location: users.php');
     }
 
     function getUser($id) {
-        $stmt = $this->db->prepare("SELECT u.id, u.name, user_login, company_id, tc.name as companyname, is_company_admin "
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email,  user_login, company_id, tc.name as companyname, is_company_admin "
                 . "FROM users u "
                 . "LEFT JOIN companies_users cu ON u.id = cu.user_id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
@@ -42,6 +46,7 @@ class Users {
         } else {
             $result['id'] = $queryResults[0]['id'];
             $result['name'] = $queryResults[0]['name'];
+            $result['email'] = $queryResults[0]['email'];
             $result['user_login'] = $queryResults[0]['user_login'];
             $result['company'] = array();
             foreach ($queryResults as $userData) {
@@ -55,9 +60,9 @@ class Users {
     }
 
     function getUserFromLogin($name) {
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login, u.access_level, cu.is_company_admin,tc.name as companyname,tc.id as companyid "
                 . "FROM users u "
-                . "JOIN companies_users cu ON cu.user_id = u.id "
+                . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
@@ -69,6 +74,7 @@ class Users {
         } else {
             $r['id'] = $queryResults[0]['id'];
             $r['name'] = $queryResults[0]['name'];
+            $r['email'] = $queryResults[0]['email'];
             $r['user_login'] = $queryResults[0]['user_login'];
             $r['access_level'] = $queryResults[0]['access_level'];
             foreach ($queryResults as $userData) {
@@ -79,8 +85,38 @@ class Users {
         return $r;
     }
 
+    function email_exists($email) {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
+    }
+
+    function store_reset_token($email, $token) {
+        $stmt = $this->db->prepare("UPDATE users SET reset_token = ?, _updated_at=NOW() WHERE email = ?");
+        $stmt->bind_param("ss", $token, $email);
+        $stmt->execute();
+    }
+
+    function send_reset_email($host, $email, $token) {
+        $reset_link = $host . "?token=" . $token;
+        $subject = "Richiesta di reset della password";
+        $message = "Clicka qui per reimpostare la password: <a href='" . $reset_link."'>". $reset_link."</a>";
+        include_once(__DIR__ . '/Mailer.php');
+        Mailer::mail($email, $subject, $message);            
+    }
+
+    function validate_reset_token($token) {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE reset_token = ? and _updated_at > DATE_SUB(NOW(), INTERVAL 4 MINUTE)");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
+    }
+
     function getAllUsers() {
-        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.user_login, cu.is_company_admin,tc.name as companyname,tc.id as companyid  "
+        $stmt = $this->db->prepare("SELECT DISTINCT u.id, u.name, u.email, u.user_login, cu.is_company_admin,tc.name as companyname,tc.id as companyid  "
                 . "FROM users u "
                 . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
@@ -93,6 +129,7 @@ class Users {
                 array_push($userUsedTemp, $user['id']);
                 $r[$user['id']]['id'] = $user['id'];
                 $r[$user['id']]['name'] = $user['name'];
+                $r[$user['id']]['email'] = $user['email'];
                 $r[$user['id']]['user_login'] = $user['user_login'];
             }
             $r[$user['id']]['company'][$user['companyid']]['name'] = $user['companyname'];
@@ -105,7 +142,7 @@ class Users {
     }
 
     function getUsersInScope($userid) {
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, u.access_level "
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login, u.access_level "
                 . "FROM `companies_users` cu "
                 . "INNER JOIN companies_users cu2 ON cu2.company_id = cu.company_id "
                 . "JOIN users u ON u.id = cu2.user_id "
@@ -123,7 +160,7 @@ class Users {
             }
         }
         $implodedString = implode(',', $companiesIds);
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.user_login, cu.company_id, cu.is_company_admin 
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login, cu.company_id, cu.is_company_admin 
 FROM companies_users cu 
 JOIN users u ON u.id = cu.user_id 
 WHERE cu.company_id IN (" . $implodedString . ") 
@@ -160,17 +197,18 @@ ORDER BY u.name ASC;");
         }
     }
 
-    function insertUser($name, $user_login, $passwordClear, $showsArray, $arrayOfcompany, $arrayOfiscompanyadmin) {
+    function insertUser($name, $user_login, $email, $passwordClear, $showsArray, $arrayOfcompany, $arrayOfiscompanyadmin) {
         $validate = $this->validateField($name, $user_login, $passwordClear);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
         }
-        $stmt = $this->db->prepare("INSERT IGNORE INTO users (name, user_login, password) "
-                . "VALUES (?,?,?)");
+        $stmt = $this->db->prepare("INSERT IGNORE INTO users (name, user_login, email, password) "
+                . "VALUES (?,?,?,?)");
         $hash = md5($passwordClear);
         $name = trim($name);
         $user_login = trim($user_login);
-        $stmt->bind_param("sss", $name, $user_login, $hash);
+        $email = trim($email);
+        $stmt->bind_param("ssss", $name, $user_login, $email, $hash);
         $stmt->execute();
         if ($stmt->affected_rows == 0) {
             return "Errore, Utente non inserito: Login già esistente";
@@ -203,7 +241,7 @@ ORDER BY u.name ASC;");
         $stmt->execute();
     }
 
-    function updateUser($userId, $name, $user_login, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
+    function updateUser($userId, $name, $user_login, $email, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
         $validate = $this->validateField($name, $user_login, $passwordClear);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
@@ -237,15 +275,15 @@ ORDER BY u.name ASC;");
 
         if ($passwordClear != null & $passwordClear != "") {
             $stmt = $this->db->prepare("UPDATE users 
-            SET name=?, user_login=?, password=?
+            SET name=?, user_login=?, email=?, password=?, _updated_at=NOW()
             WHERE id=?");
             $hash = md5($passwordClear);
-            $stmt->bind_param("sssi", $name, $user_login, $hash, $userId);
+            $stmt->bind_param("ssssi", $name, $user_login, $email, $hash, $userId);
         } else {
             $stmt = $this->db->prepare("UPDATE users 
-            SET name=?, user_login=?
+            SET name=?, user_login=?, email=?, _updated_at=NOW()
             WHERE id=?");
-            $stmt->bind_param("ssi", $name, $user_login, $userId);
+            $stmt->bind_param("sssi", $name, $user_login, $email, $userId);
         }
         $stmt->execute();
         // add admin to company
@@ -289,6 +327,13 @@ ORDER BY u.name ASC;");
         }
     }
 
+    function update_password($token, $new_password) {
+        $stmt = $this->db->prepare("UPDATE users SET password = ?, reset_token = NULL, _updated_at=NOW() WHERE reset_token = ?");
+        $hash = md5($new_password);
+        $stmt->bind_param("ss", $hash, $token);
+        $stmt->execute();
+    }
+    
     function getShowsForUser($userId) {
         $result = array();
         $stmt = $this->db->prepare("SELECT s.id "

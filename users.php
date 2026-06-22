@@ -11,7 +11,6 @@ $users = new Users();
 $comp = new Company();
 $shows = new Shows();
 
-
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $numberOfUsersInScope = count( $users->getUsersInScope($thisUser['id']));
 $loginData['isLogged'] = true;

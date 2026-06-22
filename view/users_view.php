@@ -24,6 +24,9 @@
                 <input type="text" name="login" placeholder="Login" value= "">
             </div>
             <div class="foc">
+                <input type="email" name="email" placeholder="Email" value= "">
+            </div>
+            <div class="foc">
                 <input type="password" name="password" placeholder="Password" value= "">  
             </div> 
             <div class="foc">
@@ -35,11 +38,9 @@
                     <?php if ($hasMultipleCompany) { ?>
                         <div class="foc">
                             <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $compData['id']; ?>" ></label>
-                        </div>
                     <?php } else { ?>
                         <input type="hidden" name="company[]" value= "<?php echo $compData['id']; ?>">
                     <?php } ?>
-                <div class="foc">        
                     <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $compData['id']; ?>"></label>
                 </div>
                 <?php
@@ -67,12 +68,19 @@
             <input type="hidden" name="id" value= "<?php echo $userToModify['id']; ?>">
             <input type="hidden" name="f" value= "uu"> 
             <div class="foc">
+                Nome per esteso
                 <input type="text" name="name" value= "<?php echo $userToModify['name']; ?>">
             </div>
             <div class="foc">
+                Login
                 <input type="text" name="login" value= "<?php echo $userToModify['user_login']; ?>">
             </div>
             <div class="foc">
+                Email
+                <input type="email" name="email" placeholder="Email" value= "<?php echo $userToModify['email']; ?>">
+            </div>
+            <div class="foc">
+                Password
                 <input type="password" name="password" placeholder="Nuova Password" value= "">
             </div>
             <div class="foc">
@@ -90,11 +98,9 @@
                     <?php if ($hasMultipleCompany) { ?>
                     <div class="foc">
                         <label><?php echo $compData['name']; ?><input type="checkbox" id="user_to_company_<?php echo $companyId; ?>" name="company[]" value="<?php echo $companyId; ?>" <?php echo $isInThisCompany; ?> <?php echo $disabled; ?>></label>
-                     </div>
                     <?php } else { ?>
                         <input type="hidden" name="company[]" value= "<?php echo $companyId; ?>">
                     <?php } ?>
-                <div class="foc">        
                     Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $companyId; ?>" <?php echo $isCompanyAdminChecked; ?> <?php echo $disabled; ?>>
                 </div>
                 <?php } ?>

@@ -24,8 +24,11 @@ CREATE TABLE `prenotazioni` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(512) NOT NULL,
+  `email` text,
   `user_login` varchar(512) NOT NULL,
   `password` varchar(40) NOT NULL,
+  `reset_token` text CHARACTER SET latin1 COLLATE latin1_swedish_ci,
+  `_updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `access_level` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
