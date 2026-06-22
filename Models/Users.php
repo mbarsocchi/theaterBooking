@@ -102,10 +102,9 @@ class Users {
     function send_reset_email($host, $email, $token) {
         $reset_link = $host . "?token=" . $token;
         $subject = "Richiesta di reset della password";
-        $message = "Clicka qui per reimpostare la password: " . $reset_link;
-        include_once(__DIR__ . '/Models/Mailer.php');
-        $mailer = new Mailer();
-        $mailer->mail($email, $subject, $message);            
+        $message = "Clicka qui per reimpostare la password: <a href='" . $reset_link."'>". $reset_link."</a>";
+        include_once(__DIR__ . '/Mailer.php');
+        Mailer::mail($email, $subject, $message);            
     }
 
     function validate_reset_token($token) {

@@ -3,42 +3,40 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require  __DIR__ . '/../vendor/phpmailer/src/Exception.php';
-require  __DIR__ . '/../vendor/phpmailer/src/PHPMailer.php';
-require  __DIR__ . '/../vendor/phpmailer/src/SMTP.php';
-include_once(__DIR__ . '/../config.php');
+require  __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
+require  __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require  __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
 
 class Mailer {
 
-    private $sender_email;
 
-    function custom_phpmailer_init($phpmailer) {
-        $phpmailer->Host =$mailSmtpHost;
-        $phpmailer->Port = $mailPort;
-        $phpmailer->Username = $mailUsername;
-        $phpmailer->Password = $mailPAssword;
-        $this->senderEmail =$mailSender;
-
-        $phpmailer->SMTPAuth = true;
-        $phpmailer->SMTPSecure = 'ssl';
-        $phpmailer->IsSMTP();
+    protected function __construct() {
+        
     }
 
-    private function isConfigured(){
-        return $phpmailer->Host && $phpmailer->Host != "";
-    }
-
-    function mail($email, $subject, $message){
-        if($this->isConfigured()){
-            $mail = new PHPMailer(true);
-            $mail->setFrom($this->senderEmail, 'Sistema Prenotazioni teatro');
-            $mail->addAddress($email);
-            $mail->addReplyTo(this->senderEmail);
-            $mail->isHTML(true);  
-            $mail->Subject = $subject;
-            $mail->Body    = $message;
-            $mail->AltBody = $message;
-            $mail->send();
+    public static function mail($email, $subject, $message){
+        include(__DIR__ . '/../config.php');
+        if($mailSmtpHost && $mailSmtpHost != ""){
+            try {
+                $mail = new PHPMailer(true);
+                $mail->Host =$mailSmtpHost;
+                $mail->Port = $mailPort;
+                $mail->Username = $mailUsername;
+                $mail->Password = $mailPAssword;
+                $mail->setFrom($senderEmail, 'Sistema Prenotazioni teatro');
+                $mail->addReplyTo($senderEmail);
+                $mail->SMTPAuth = true;
+                $mail->SMTPSecure = 'ssl';
+                $mail->IsSMTP();
+                $mail->addAddress($email);
+                $mail->isHTML(true);  
+                $mail->Subject = $subject;
+                $mail->Body    = $message;
+                $mail->AltBody = $message;
+                $mail->send();
+            } catch (Exception $e) {
+                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            }
         }else {
             mail($email, $subject, $message);
         }
