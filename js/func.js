@@ -134,7 +134,9 @@ function subAddShow() {
     var name = document.forms["addshow"]["namei"].value;
     var seat = document.forms["addshow"]["seatsi"].value;
     var data = document.forms["addshow"]["timestamp"].value;
-    
+    var realseat = document.forms["addshow"]["realseatsi"].value;
+    var dayhoverbooki  = document.forms["addshow"]["dayhoverbooki"].value;
+
     if (data == null || data == "") {
         alert("Inserisci una data");
         return false;
@@ -147,7 +149,18 @@ function subAddShow() {
     if (seat == null || seat == "" || isNaN(seat)) {
         alert("Inserisci il numero di posti correttamente");
         return false;
+    } else if (realseat= null || realseat == "" || isNaN(realseat)){
+        if (realseat > seat){
+           alert("L'Hoverbooking deve essere maggiore o uguale al numero di posti reali");
+           return false; 
+        }
+        if (dayhoverbooki= null || dayhoverbooki == "" || isNaN(dayhoverbooki)){
+            alert("Devi inserire un numero di giorni per l'hoverbooking,\nda quel giorno non si accetteranno prenotazioni in hoverbooking,\nma solo sul numero di posti reali");
+            return false; 
+        }
+
     }
+
     let hasOneCompany = typeof $('#oneonlycompany').val() != 'undefined';
     if (!hasOneCompany && $('input:radio:checked').length == 0) {
         alert("Seleziona almeno una compagnia");

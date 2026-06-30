@@ -43,7 +43,12 @@
                 <input type="text" name="detailsi" placeholder="Dettagli" value= "">
             </div>
             <div class="foc">
-                <input type="text" name="seatsi" placeholder="Numero posti" value= "">
+                <input type="text" name="seatsi" placeholder="Numero posti hoverbooking" value= "">
+            </div>
+            <div class="foc">
+                <input type="text" name="realseatsi" placeholder="Numero posti reali" value= "">
+                Numero di giorni per la chiusura dell'hoverbooking
+                <input type="text" name="dayhoverbooki" placeholder="2" value= "2">
             </div>
             <?php
             $countCompanies = count($companies);
@@ -86,7 +91,12 @@
             </div>
             <div class="foc">
                 <input type="text" name="seats" value= "<?php echo $showToModify['posti']; ?>">
-            </div>    
+            </div>
+            <div class="foc">
+                <input type="text" name="realseats" value= "<?php echo $showToModify['hoverbooking']; ?>">
+                Numero di giorni per la chiusura dell'hoverbooking
+                <input type="text" name="dayhoverbook" value= "<?php echo $showToModify['hoverboookdays']; ?>">
+            </div>  
             <div class="foc">
                 Compagnia dello spettacolo: <?php echo $showToModify['companyName']; ?>
             </div>  

@@ -8,6 +8,8 @@ CREATE TABLE `spettacoli` (
   `dettagli` text NOT NULL,
   `data` datetime NOT NULL,
   `posti` int(11) NOT NULL DEFAULT 40
+  `posti_reali` int NOT NULL DEFAULT (`posti`),
+  `hoverbook_giorni` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 

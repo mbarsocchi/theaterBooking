@@ -16,14 +16,32 @@ class Shows {
         $r = null;
         switch (filter_input(INPUT_POST, 'f')) {
             case 'i':
-                $r = $this->insertShow(filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'namei'), filter_input(INPUT_POST, 'locationi'),
-                        filter_input(INPUT_POST, 'detailsi'), filter_input(INPUT_POST, 'seatsi'), filter_input(INPUT_POST, 'userid'), filter_input(INPUT_POST, 'company'));
+                $r = $this->insertShow(
+                        filter_input(INPUT_POST, 'timestamp'), 
+                        filter_input(INPUT_POST, 'namei'), 
+                        filter_input(INPUT_POST, 'locationi'),
+                        filter_input(INPUT_POST, 'detailsi'), 
+                        filter_input(INPUT_POST, 'seatsi'), 
+                        filter_input(INPUT_POST, 'userid'),
+                        filter_input(INPUT_POST, 'realseatsi'), 
+                        filter_input(INPUT_POST, 'dayhoverbooki'), 
+                        filter_input(INPUT_POST, 'company')
+                        );
                 break;
             case 'd':
                 $this->deleteShow(filter_input(INPUT_POST, 'id'));
                 break;
             case 'u':
-                $r = $this->updateShow(filter_input(INPUT_POST, 'id'), filter_input(INPUT_POST, 'timestamp'), filter_input(INPUT_POST, 'name'), filter_input(INPUT_POST, 'location'), filter_input(INPUT_POST, 'details'), filter_input(INPUT_POST, 'seats'));
+                $r = $this->updateShow(
+                    filter_input(INPUT_POST, 'id'), 
+                    filter_input(INPUT_POST, 'timestamp'), 
+                    filter_input(INPUT_POST, 'name'), 
+                    filter_input(INPUT_POST, 'location'), 
+                    filter_input(INPUT_POST, 'details'), 
+                    filter_input(INPUT_POST, 'seats'), 
+                    filter_input(INPUT_POST, 'realseats'), 
+                    filter_input(INPUT_POST, 'dayhoverbook'), 
+                );
                 break;
             default:
                 break;
@@ -36,26 +54,32 @@ class Shows {
         return $r;
     }
 
-    private function validateField($name, $seats) {
+    private function validateField($name, $seats, $realSeats, $dayHoverbook) {
         if (!isset($name) || $name == "") {
             return "Il nome non può essere vuoto";
         }
         if (!isset($seats) || $seats == "" || !filter_var($seats, FILTER_VALIDATE_INT)) {
             return "Devi insererire un numero di posti a sedere";
         }
+        if (isset($seats) && isset($realSeats) && $seats < $realSeats){
+            return "Il numero di posti in hoverbooking deve essere uguale o maggiore a quello dei posti reali";
+        }
+        if (isset($seats) && isset($realSeats) && ($seats != $realSeats) && !isset($$dayHoverbook) ){
+            return "Devi inserire il numero di giorni di hoverbooking, sennò che li hai messi a fari diversi ?";
+        }
     }
 
-    function updateShow($id, $timestamp, $name, $location, $details, $seats) {
-        $validate = $this->validateField($name, $seats);
+    function updateShow($id, $timestamp, $name, $location, $details, $seats, $realSeats, $dayHoverbook) {
+        $validate = $this->validateField($name, $seats, $realSeats, $dayHoverbook);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
         }
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
         $stmt = $this->db->prepare("UPDATE spettacoli 
-            SET nome=?, luogo=?, dettagli=?, data=?, posti=? 
+            SET nome=?, luogo=?, dettagli=?, data=?, posti=?, posti_reali=?, hoverbook_giorni=?
             WHERE id=?");
         $name = trim($name);
-        $stmt->bind_param("ssssii", $name, $location, $details, $convertedDate, $seats, $id);
+        $stmt->bind_param("ssssiiiiii", $name, $location, $details, $convertedDate, $seats, $realSeats, $dayHoverbook, $id);
         return $stmt->execute();
     }
 
@@ -90,16 +114,16 @@ class Shows {
         $stmt->execute();
     }
 
-    function insertShow($timestamp, $name, $location, $details, $seats, $userId, $companyId) {
-        $validate = $this->validateField($name, $seats);
+    function insertShow($timestamp, $name, $location, $details, $seats, $realSeats, $dayHoverbook, $userId, $companyId) {
+        $validate = $this->validateField($name, $seats, $realSeats, $dayHoverbook);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
         }
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
-        $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, company_id, dettagli, data, posti) "
-                . "VALUES (?,?,?,?,?,?)");
+        $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, company_id, dettagli, data, posti, posti_reali, hoverbook_giorni) "
+                . "VALUES (?,?,?,?,?,?,?,?)");
         $name = trim($name);
-        $stmt->bind_param("ssisss", $name, $location, $companyId, $details, $convertedDate, $seats);
+        $stmt->bind_param("ssissiii", $name, $location, $companyId, $details, $convertedDate, $seats, $realSeats, $dayHoverbook);
         $stmt->execute();
         $showId = $stmt->insert_id;
         $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
