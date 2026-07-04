@@ -1,14 +1,17 @@
 <div class="content">
     <h2><?php if (count($usersInScope)) { ?>
         Modifica:
+        <select id="users" name="users" onchange="window.location.href = this.value?  'users.php?ui=' + this.value:'users.php';">
+            <option value=""></option>
             <?php foreach ($usersInScope as $user) { ?>
                 <?php if (isset($userToModify['id']) && $userToModify['id'] == $user['id']) { ?>
-                    <?php echo $user['name']; ?>
+                    <option value="<?php echo $user['id']; ?>" selected><?php echo $user['name']; ?></option>
                 <?php } else { ?>
-                    <a href="?ui=<?php echo $user['id']; ?>"><?php echo $user['name']; ?></a>                
+                    <option value="<?php echo $user['id']; ?>"><?php echo $user['name']; ?></option>
                 <?php } ?>
             <?php } ?>
         <?php } ?>
+        </select>
     </h2>
     <?php if (count($usersInScope) && !isset($userToModify)) { ?>
         <h2>Inserisci nuovo utente</h2>

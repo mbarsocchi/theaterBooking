@@ -43,26 +43,30 @@
                 <input type="text" name="detailsi" placeholder="Dettagli" value= "">
             </div>
             <div class="foc">
-                <input type="text" name="seatsi" placeholder="Numero posti hoverbooking" value= "">
+                <input type="text" name="seatsi" placeholder="Numero posti disponibili (compreso hoverbooking)" value= "">
             </div>
             <div class="foc">
                 <input type="text" name="realseatsi" placeholder="Numero posti reali" value= "">
-                Numero di giorni per la chiusura dell'hoverbooking
-                <input type="text" name="dayhoverbooki" placeholder="2" value= "2">
             </div>
+            <div class="foc">    
+                <input type="text" name="dayhoverbooki" placeholder="2" value= "2">
+                (numero di giorni prima della chiusura dell'hoverbook)
+            </div>
+            <div class="foc">
+            <h2 style="display: inline;">Compagnia:</h2>
             <?php
             $countCompanies = count($companies);
             if ($countCompanies > 1) {?>
-            <h2>Compagnie</h2>
+            <select id="companies" name="companies">
+                <option value=""></option>
                 <?php foreach ($companies as $companyId => $compData) {
                     ?>
-                    <div class="foc">
-                        <label><?php echo $compData['name']; ?><input type="radio" id="user_to_company_<?php echo $companyId; ?>" name="company" value="<?php echo $compData['id']; ?>" ></label>
-                    </div>
+                    <option id="user_to_company_<?php echo $companyId; ?>" name="company" value="<?php echo $compData['id']; ?>"><?php echo $compData['name']; ?></option>
                 <?php } ?>
+            </select>
             <?php } else if ($countCompanies === 1) { ?>
-                <div class="foc">
-                    <label><?php echo $companies[0]['name']; ?><input type="radio" id="user_to_company_<?php echo $companies[0]['id']; ?>" name="company" value="<?php echo $companies[0]['id']; ?>" readonly checked></label>
+                    <?php echo $companies[0]['name']; ?>
+                    <input type="hidden" id="oneonlycompany" name="company" value="<?php echo $companies[0]['id']; ?>">
                 </div>
             <?php } ?>
             <div class="foc"><input type="submit" value="inserisci" /></div>
@@ -77,25 +81,33 @@
                         $("#dtBox1").DateTimePicker();
                     });
                 </script>
+                Data e orario
                 <input type="text" name="timestamp" data-field="datetime" placeholder="Data" value= "<?php echo $showToModify['data']; ?>" readonly>
                 <div id="dtBox1"></div>
             </div>    
             <div class="foc">
+                Nome dello spettacolo
                 <input type="text" name="name" value= "<?php echo $showToModify['nome']; ?>">
             </div>  
             <div class="foc">
+                Teatro
                 <input type="text" name="location" placeholder="Nome teatro" value="<?php echo $showToModify['luogo']; ?>">
             </div>       
             <div class="foc">
+                Dettagli
                 <input type="text" name="details"  placeholder="Dettagli"  value="<?php echo $showToModify['dettagli']; ?>">
             </div>
             <div class="foc">
+                Posti (compreso hoverbooking)
                 <input type="text" name="seats" value= "<?php echo $showToModify['posti']; ?>">
             </div>
             <div class="foc">
-                <input type="text" name="realseats" value= "<?php echo $showToModify['hoverbooking']; ?>">
+                Posti reali
+                <input type="text" name="realseats" value= "<?php echo $showToModify['posti_reali']; ?>">
+            </div>
+            <div class="foc">   
                 Numero di giorni per la chiusura dell'hoverbooking
-                <input type="text" name="dayhoverbook" value= "<?php echo $showToModify['hoverboookdays']; ?>">
+                <input type="text" name="dayhoverbook" value= "<?php echo $showToModify['hoverbook_giorni']; ?>">
             </div>  
             <div class="foc">
                 Compagnia dello spettacolo: <?php echo $showToModify['companyName']; ?>

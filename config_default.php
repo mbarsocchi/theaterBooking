@@ -1,4 +1,5 @@
 <?php
+$debug =false;
 $dbHost = "";
 $username = "";
 $password = "";

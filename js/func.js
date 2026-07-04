@@ -146,23 +146,25 @@ function subAddShow() {
         alert("Inserisci un nome");
         return false;
     }
-    if (seat == null || seat == "" || isNaN(seat)) {
+    const hasAvailableSetUnSettled = (seat == null || seat == "" || isNaN(seat) )
+    const hasRealSetUnSettled = (realseat == null || realseat == "" || isNaN(realseat))
+    const hasDayHoverboonignUnsettled = (dayhoverbooki == null || dayhoverbooki == "" || isNaN(dayhoverbooki))
+    if (hasAvailableSetUnSettled && hasRealSetUnSettled) {
         alert("Inserisci il numero di posti correttamente");
         return false;
-    } else if (realseat= null || realseat == "" || isNaN(realseat)){
+    } else if (!hasAvailableSetUnSettled && !hasRealSetUnSettled) {
         if (realseat > seat){
            alert("L'Hoverbooking deve essere maggiore o uguale al numero di posti reali");
            return false; 
         }
-        if (dayhoverbooki= null || dayhoverbooki == "" || isNaN(dayhoverbooki)){
+        if (hasDayHoverboonignUnsettled){
             alert("Devi inserire un numero di giorni per l'hoverbooking,\nda quel giorno non si accetteranno prenotazioni in hoverbooking,\nma solo sul numero di posti reali");
             return false; 
         }
-
     }
 
     let hasOneCompany = typeof $('#oneonlycompany').val() != 'undefined';
-    if (!hasOneCompany && $('input:radio:checked').length == 0) {
+    if (!hasOneCompany && $('#companies').val()== '') {
         alert("Seleziona almeno una compagnia");
         return false;
     }

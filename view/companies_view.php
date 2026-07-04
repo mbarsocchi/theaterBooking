@@ -1,14 +1,17 @@
 <div class="content">
     <h2><?php if (count($companies)) { ?>
         Modifica:
-            <?php foreach ($companies as $key => $company) { ?>
+            <select id="companies" name="companies" onchange="window.location.href = this.value?  'company.php?cu=' + this.value:'company.php';">
+            <option value=""></option>
+            <?php foreach ($companies as $company) { ?>
                 <?php if (isset($companyToModify['id']) && $companyToModify['id'] == $company['id']) { ?>
-                    <?php echo $company['name']; ?>
+                    <option value="<?php echo $company['id']; ?>" selected><?php echo $company['name']; ?></option>
                 <?php } else { ?>
-                    <a href="?cu=<?php echo $company['id']; ?>"><?php echo $company['name']; ?></a>                
+                    <option value="<?php echo $company['id']; ?>"><?php echo $company['name']; ?></option>
                 <?php } ?>
             <?php } ?>
         <?php } ?>
+        </select>
     </h2>
     <?php if (!isset($companyToModify)) { ?>
         <h2>Inserisci nuova compagnia</h2>

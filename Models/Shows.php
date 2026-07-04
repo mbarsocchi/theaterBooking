@@ -21,11 +21,11 @@ class Shows {
                         filter_input(INPUT_POST, 'namei'), 
                         filter_input(INPUT_POST, 'locationi'),
                         filter_input(INPUT_POST, 'detailsi'), 
-                        filter_input(INPUT_POST, 'seatsi'), 
-                        filter_input(INPUT_POST, 'userid'),
+                        filter_input(INPUT_POST, 'seatsi'),
                         filter_input(INPUT_POST, 'realseatsi'), 
-                        filter_input(INPUT_POST, 'dayhoverbooki'), 
-                        filter_input(INPUT_POST, 'company')
+                        filter_input(INPUT_POST, 'dayhoverbooki'),
+                        filter_input(INPUT_POST, 'userid'),
+                        filter_input(INPUT_POST, 'companies')
                         );
                 break;
             case 'd':
@@ -41,6 +41,7 @@ class Shows {
                     filter_input(INPUT_POST, 'seats'), 
                     filter_input(INPUT_POST, 'realseats'), 
                     filter_input(INPUT_POST, 'dayhoverbook'), 
+                    filter_input(INPUT_POST, 'companies')
                 );
                 break;
             default:
@@ -58,13 +59,11 @@ class Shows {
         if (!isset($name) || $name == "") {
             return "Il nome non può essere vuoto";
         }
-        if (!isset($seats) || $seats == "" || !filter_var($seats, FILTER_VALIDATE_INT)) {
-            return "Devi insererire un numero di posti a sedere";
-        }
-        if (isset($seats) && isset($realSeats) && $seats < $realSeats){
+        if ((!isset($seats)|| $seats == "") && (!isset($realSeats)|| $realSeats == "" )){
+            return "Numero di posti non settato";
+        } else  if ((isset($seats) && $seats != "") && (isset($realSeats) && $realSeats != "" ) && $seats < $realSeats){
             return "Il numero di posti in hoverbooking deve essere uguale o maggiore a quello dei posti reali";
-        }
-        if (isset($seats) && isset($realSeats) && ($seats != $realSeats) && !isset($$dayHoverbook) ){
+        } else if (isset($seats) && isset($realSeats) && ($seats != $realSeats) && !isset($dayHoverbook) ){
             return "Devi inserire il numero di giorni di hoverbooking, sennò che li hai messi a fari diversi ?";
         }
     }
@@ -73,14 +72,32 @@ class Shows {
         $validate = $this->validateField($name, $seats, $realSeats, $dayHoverbook);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
+            return;
         }
+        if ((isset($seats) && $seats != "") && (!isset($realSeats) || $realSeats == "")){
+            $realSeats = $seats;
+        }else if ((!isset($seats) || $seats == "") && (isset($realSeats) && $realSeats != "")){
+            $seats = $realSeats;
+        }
+        if (!isset($dayHoverbook)){
+            $dayHoverbook = 0;
+        }
+
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
         $stmt = $this->db->prepare("UPDATE spettacoli 
             SET nome=?, luogo=?, dettagli=?, data=?, posti=?, posti_reali=?, hoverbook_giorni=?
             WHERE id=?");
         $name = trim($name);
-        $stmt->bind_param("ssssiiiiii", $name, $location, $details, $convertedDate, $seats, $realSeats, $dayHoverbook, $id);
-        return $stmt->execute();
+        $stmt->bind_param("ssssiiii", $name, $location, $details, $convertedDate, $seats, $realSeats, $dayHoverbook, $id);
+        try{
+           return $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
     }
 
     function returnDataForSpettacoloId($id) {
@@ -89,7 +106,15 @@ class Shows {
                 . "JOIN theatre_companies tc ON s.company_id = tc.id "
                 . "WHERE s.id = ?");
         $stmt->bind_param("s", $id);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         $r = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $r = count($r) == 0 ? null : $r[0];
         return $r;
@@ -102,7 +127,15 @@ class Shows {
                 . "AND us.show_id = ? "
                 . "AND u.access_level != 0");
         $stmt->bind_param("i", $user['id']);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $c) {
             if ($c['count'] > 0) {
                 $r['erromessage'] = "Devi prima eliminare tutti gli utenti, tranne te, per eliminare uno spettacolo";
@@ -111,45 +144,95 @@ class Shows {
         }
         $stmt = $this->db->prepare("DELETE FROM spettacoli WHERE id=?");
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
     }
 
     function insertShow($timestamp, $name, $location, $details, $seats, $realSeats, $dayHoverbook, $userId, $companyId) {
         $validate = $this->validateField($name, $seats, $realSeats, $dayHoverbook);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
+            die();
         }
+        if ((isset($seats) && $seats != "") && (!isset($realSeats) || $realSeats == "")){
+            $realSeats = $seats;
+        }else if ((!isset($seats) || $seats == "") && (isset($realSeats) && $realSeats != "")){
+            $seats = $realSeats;
+        }
+        if (!isset($dayHoverbook)){
+            $dayHoverbook = 0;
+        }
+
         $convertedDate = date("Y-m-d H:i:s", strtotime($timestamp));
+
         $stmt = $this->db->prepare("INSERT INTO spettacoli (nome, luogo, company_id, dettagli, data, posti, posti_reali, hoverbook_giorni) "
                 . "VALUES (?,?,?,?,?,?,?,?)");
         $name = trim($name);
         $stmt->bind_param("ssissiii", $name, $location, $companyId, $details, $convertedDate, $seats, $realSeats, $dayHoverbook);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         $showId = $stmt->insert_id;
         $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
                 . "VALUES (?,?)");
         $stmt->bind_param("ii", $showId, $userId);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
 
         $stmt = $this->db->prepare("SELECT company_id FROM companies_users "
                 . "WHERE user_id = ? "
                 . "AND is_company_admin = 1");
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
 
         $companyIdArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     function retriveAllfutureShow($userId) {
-        $now = date(self::SQL_DATE_FORMAT, time());
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "JOIN users_shows us ON us.show_id = s.id "
-                . "WHERE data >= ? "
+                . "WHERE data >= NOW() "
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
-        $stmt->bind_param("si", $now, $userId);
-        $stmt->execute();
+        $stmt->bind_param("i", $userId);
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -160,10 +243,18 @@ class Shows {
                 . "     WHERE cu.user_id = ?  "
                 . "     AND cu.is_company_admin = 1 "
                 . ")"
-                . "AND s.data >= ? "
+                . "AND s.data >= NOW() "
                 . "ORDER BY data ASC");
-        $stmt->bind_param("is", $userId, $now);
-        $stmt->execute();
+        $stmt->bind_param("i", $userId);
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -178,7 +269,15 @@ class Shows {
                     . "WHERE us.show_id "
                     . "IN (".$inCondition.") "
                     . "GROUP BY us.user_id ");
-            $stmt->execute();
+            try{
+                $stmt->execute();
+            }catch( mysqli_sql_exception $e ){
+                global $debug;
+                if($debug){
+                    echo $e->getMessage();
+                    die;
+                }
+            }
             $queryResult = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             return array_map(function ($o) {
                 return $o['user_id'];
@@ -197,7 +296,15 @@ class Shows {
                 . "AND s.ID IN  (" . $inCondition . ") "
                 . "ORDER BY data ASC");
         $stmt->bind_param("s", $now);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -213,7 +320,15 @@ class Shows {
                 . "WHERE data >= ? "
                 . "ORDER BY `spettacoli`.`data` ASC");
         $stmt->bind_param("s", $today);
-        $stmt->execute();
+        try{
+            $stmt->execute();
+        }catch( mysqli_sql_exception $e ){
+            global $debug;
+            if($debug){
+                echo $e->getMessage();
+                die;
+            }
+        }
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
             $date = new DateTime($show['data']);
             $dayOfTheWeek = DateUtil::transformDay($date->format('N'));
@@ -231,7 +346,15 @@ class Shows {
                     . "AND us.user_id = ? "
                     . "ORDER BY data ASC");
             $stmt->bind_param("i", $user['id']);
-            $stmt->execute();
+            try{
+                $stmt->execute();
+            }catch( mysqli_sql_exception $e ){
+                global $debug;
+                if($debug){
+                    echo $e->getMessage();
+                    die;
+                }
+            }
             foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $showId) {
                 $result[$user['id']][] = $showId['id'] . " ";
             }
