@@ -22,10 +22,15 @@ if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, '
 }
 
 $data['isAdmin'] = $thisUser['access_level'] == 0;
-$futureShows = $shows->retriveAllfutureShow($thisUser['id']);
-$allUsersForShows = $shows->getAllUsersForShows($futureShows);
 $userCompanies = $users->getCompanyForUser($thisUser['id']);
 $data['companyICanAdmin'] = $userCompanies['adminArray'];
+if ($data['isAdmin'] || count($userCompanies['adminArray']) > 0){
+    $futureShows = $shows->retriveAllfutureShowICanManage($thisUser['id']);
+}else {
+    $futureShows = $shows->retriveAllfutureShow($thisUser['id']);
+}
+$allUsersForShows = $shows->getAllUsersForShows($futureShows);
+
 $data['usersInScope'] = [];
 foreach ($futureShows as $show) {
     if (in_array($show['company_id'], $userCompanies['adminArray'])) {

@@ -4,7 +4,8 @@
             Seleziona spettacolo e giorno
             <select name="showId" style="margin-bottom: 20px;width:100%">
                 <?php foreach ($allBookings as $day => $bookingData) {
-                    ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. Liberi: <?php echo $bookingData['freeSeats']; ?></option>
+                    $stringForFreeSeats = $bookingData['freeSeats']>=0 ?  "Liberi: ".$bookingData['freeSeats']:" Ci sono da togliere (hoverbook): " . abs($bookingData['freeSeats']);
+                    ?><option value="<?php echo$bookingData['id']; ?>"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?>. <?php echo $stringForFreeSeats; ?></option>
                 <?php } ?></select>
             <div class="mid-spacer"></div>
         <?php } else {  ?>
@@ -33,7 +34,10 @@
             <tr class="tableHeader">
                 <td colspan="4"><?php echo $bookingData['title'] . ". " . $bookingData['dayOfTheWeek'] . " " . $day; ?><br />
                     Prenotati: <?php echo $bookingData['occupiedSeats']; ?><br />
-                    Liberi: <?php echo $bookingData['freeSeats']; ?></td>
+                    <?php $stringForFreeSeats = $bookingData['freeSeats']>=0 ?  "Liberi: ".$bookingData['freeSeats']:"Liberi 0. <span style='color: red;'>Ci sono da togliere (hoverbook): " 
+                    . abs($bookingData['freeSeats'])." prenotazioni</span>";
+                    echo $stringForFreeSeats; ?>
+                </td>
             </tr>
             <tr class="tableHeader">
                 <td style="width:2%">&nbsp;</td>

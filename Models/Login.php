@@ -66,7 +66,7 @@ class Login {
         $token = hash('sha256', $authenticator);
         $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
         $stmt->bind_param("ssis", $selector, $token, $id, $expires);
-        $stmt->execute();
+        Database::executeQuery($stmt);
     }
 
     private function updateSession($id) {
@@ -77,7 +77,7 @@ class Login {
                 . "WHERE userid = ?");
         $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
         $stmt->bind_param("si", $id, $expires);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $currentCookieValue = $_COOKIE['remember'];
         setcookie(
                 'remember',
@@ -96,7 +96,7 @@ class Login {
                 . "JOIN users u ON at.userid = u.id "
                 . "WHERE selector = ?");
         $stmt->bind_param("s", $selector);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $authTokenArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         if (!count($authTokenArray) && isset($_COOKIE['remember'])) {
             $this->exit();
@@ -115,7 +115,7 @@ class Login {
                 . "WHERE expires < ? "
                 . "LIMIT 5");
         $stmt->bind_param("s", $expireTimestamp);
-        $stmt->execute();
+        Database::executeQuery($stmt);
     }
 
     public function isAuth() {
@@ -139,7 +139,7 @@ class Login {
         $passwordHash = md5($password);
         $stmt->bind_param("ss", $username, $passwordHash);
 
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $result = null;
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $user) {
             $result['id'] = $user['id'];
@@ -160,7 +160,7 @@ class Login {
                     . "FROM auth_tokens "
                     . "WHERE selector = ?");
             $stmt->bind_param("s", $selector);
-            $stmt->execute();
+            Database::executeQuery($stmt);
         }
         header('Location: index.php');
         exit;

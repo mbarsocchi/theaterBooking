@@ -47,7 +47,7 @@ class Company {
                 . "VALUES (?)");
         $name =trim($name);
         $stmt->bind_param("s", $name);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $companyId = $stmt->insert_id;
 
         foreach ($arryOfUsers as $userID) {
@@ -62,7 +62,7 @@ class Company {
                 $ci = intval($companyId);
                 $stmt->bind_param("ii", $ci, $userID);
             }
-            $stmt->execute();
+            Database::executeQuery($stmt);
             $companyId = $stmt->insert_id;
         }
     }
@@ -71,7 +71,7 @@ class Company {
         $stmt = $this->db->prepare("DELETE FROM theatre_companies "
                 . "WHERE id=?");
         $stmt->bind_param("i", $companyId);
-        $stmt->execute();
+        Database::executeQuery($stmt);
     }
 
     function updateCompany($companyId, $name, $arryOfUsers, $companyAdmin) {
@@ -84,7 +84,7 @@ class Company {
             WHERE id=?");
         $name=trim($name);
         $stmt->bind_param("si", $name, $companyId);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $currentUserAndAdmin = $this->getUsersOfACompany($companyId);
 
         foreach ($currentUserAndAdmin as $currentConfiguration) {
@@ -95,7 +95,7 @@ class Company {
                         . "AND user_id = ? ");
                 $ci = intval($companyId);
                 $stmt->bind_param("ii", $companyId, $currentConfiguration['user_id']);
-                $stmt->execute();
+                Database::executeQuery($stmt);
             } else if (in_array($currentConfiguration['user_id'], $companyAdmin) && !$currentConfiguration['is_company_admin']) {
                 // the user is in the currentCompany, is not an admin, but I want to be an admin
                 $stmt = $this->db->prepare("UPDATE companies_users 
@@ -104,7 +104,7 @@ class Company {
                     AND company_id=?");
                 $ci = intval($companyId);
                 $stmt->bind_param("ii", $currentConfiguration['user_id'], $ci);
-                $stmt->execute();
+                Database::executeQuery($stmt);
             }
             $currentUserId[] = $currentConfiguration['user_id'];
             if ($currentConfiguration['is_company_admin']) {
@@ -119,7 +119,7 @@ class Company {
                     . "VALUES (?,?,?)");
             $ci = intval($companyId);
             $stmt->bind_param("iii", $ci, $userToAdd, $admin);
-            $stmt->execute();
+            Database::executeQuery($stmt);
         }
         // remove admin role for removed admin
         $toRemoveAsAdmin = !isset($currentAdminId) ? array() : array_diff($currentAdminId, $companyAdmin);
@@ -130,7 +130,7 @@ class Company {
                     AND company_id=?");
             $ci = intval($companyId);
             $stmt->bind_param("ii", $userToRemoveAdmin, $ci);
-            $stmt->execute();
+            Database::executeQuery($stmt);
         }
     }
 
@@ -138,7 +138,7 @@ class Company {
         $stmt = $this->db->prepare("SELECT * "
                 . "FROM theatre_companies tc "
                 . "ORDER BY tc.name ASC;");
-        $stmt->execute();
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -163,7 +163,7 @@ class Company {
                 . "LEFT JOIN users u ON u.id = cu.user_id "
                 . "WHERE tc.id = ?;");
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC)[0];
     }
 
@@ -176,7 +176,7 @@ class Company {
                 . "AND cu.is_company_admin = 1 "
                 . "ORDER by tc.name ASC");
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -186,7 +186,7 @@ class Company {
                 . "JOIN users u ON u.id = cu.user_id "
                 . "WHERE cu.company_id = ?;");
         $stmt->bind_param("i", $companyId);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 

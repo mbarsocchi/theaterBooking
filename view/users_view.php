@@ -35,8 +35,10 @@
             <div class="foc">
                 <input type="password" name="passwordvalidate" placeholder="Ripeti Password" value= "">
             </div>
-            <h2>Compagnie</h2>
             <?php $hasMultipleCompany = count($companies)>1;
+            if ($hasMultipleCompany){?>
+                <h2>Compagnie</h2>
+            <?php  }
             foreach ($companies as $companyId => $compData) { ?>
                     <?php if ($hasMultipleCompany) { ?>
                         <div class="foc">
@@ -47,17 +49,22 @@
                     <label>Amministratore <input type="checkbox" id="iscompanyadmin_<?php echo $companyId; ?>" name="iscompanyadminArr[]" value="<?php echo $compData['id']; ?>"></label>
                 </div>
                 <?php
-            }?>
-            <h2>Spettacoli</h2>
+            }
+            if (count($futureShow ) == 0){?>
+                <h2>Potrai inserire la visibilità degli spettacoli dopo aver creato l'utente e assegnato almeno una compagnia</h2>
             <?php
-            $checked = "checked";
-            foreach ($futureShow as $oneShow) {
-                ?>
-                <div class="foc">
-                    <label><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ></label>
-                </div>
-                <?php
-                $checked = "";
+            }else { ?>
+                <h2>Spettacoli</h2>
+            <?php
+                $checked = "checked";
+                foreach ($futureShow as $oneShow) {
+                    ?>
+                    <div class="foc">
+                        <label><?php echo $oneShow['data'] . " " . $oneShow['nome']; ?><input type="checkbox" id="insert_show_<?php echo $oneShow['id']; ?>" name="show[]" value="<?php echo $oneShow['id']; ?>" <?php echo $checked; ?> ></label>
+                    </div>
+                    <?php
+                    $checked = "";
+                }
             }
             ?>
             <div class="foc">

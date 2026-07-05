@@ -66,7 +66,7 @@ class Booking {
         if ($this->canIDeleteThisPreno($myUserId, $id)) {
             $stmt = $this->db->prepare("DELETE FROM prenotazioni WHERE id = ?");
             $stmt->bind_param("i", $id);
-            $stmt->execute();
+            Database::executeQuery($stmt);
         }
     }
 
@@ -99,22 +99,32 @@ class Booking {
         }
     }
 
+    private function weAreAfterHoverBookPeriod($hoverbook_days, $showDate) {
+        $isSetHoverbooking = isset($hoverbook_days) &&$hoverbook_days != 0 && $hoverbook_days!== null && $hoverbook_days != "";
+        $weCanStillHoverbook = strtotime("today 00:00") -(strtotime($showDate. ' - '.$hoverbook_days.' days')) < 0; 
+        return !$isSetHoverbooking || $weCanStillHoverbook;
+    }
+
     function insertPreno($name, $userId, $id) {
         $validate = $this->validateField($name);
         if (isset($validate)) {
             echo "<h2>" . $validate . "</h2>";
         }
-        $stmt = $this->db->prepare("SELECT id,posti FROM spettacoli WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id,posti, posti_reali, hoverbook_giorni FROM spettacoli WHERE id = ?");
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
             $idShow = $show['id'];
-            $maxPosti = $show['posti'];
+            if ($this->weAreAfterHoverBookPeriod($show['hoverbook_giorni'], $show['data'])) {
+                $maxPosti = $show['posti'];
+            }else  {
+                $maxPosti = $show['posti_reali'];
+            }
             $stmt->free_result();
         }
         $stmt = $this->db->prepare("SELECT count(1) as count FROM prenotazioni WHERE id_spettacolo = ?");
         $stmt->bind_param("s", $idShow);
-        $stmt->execute();
+        Database::executeQuery($stmt);
         $rows = $stmt->get_result()->fetch_assoc();
         $count = $rows['count'];
         $stmt->free_result();
@@ -126,7 +136,7 @@ class Booking {
                     . "VALUES (?,?,?,?)");
             $name = trim($name);
             $stmt->bind_param("isis", $idShow, $name, $userId, $today);
-            $stmt->execute();
+            Database::executeQuery($stmt);
         }
     }
 
@@ -143,7 +153,11 @@ class Booking {
             $bookingData[$dateFormatted]['companyId'] = $show['company_id'];
             $bookingData[$dateFormatted]['dayOfTheWeek'] = DateUtil::transformDay($date->format('N'));
             $bookingData[$dateFormatted]['occupiedSeats'] = isset($temp[$dateFormatted]) ? count($temp[$dateFormatted]['bookings']) : 0;
-            $bookingData[$dateFormatted]['freeSeats'] = $show['posti'] - $bookingData[$dateFormatted]['occupiedSeats'];
+            if ($this->weAreAfterHoverBookPeriod($show['hoverbook_giorni'], $show['data'])) {
+                $bookingData[$dateFormatted]['freeSeats'] = $show['posti'] - $bookingData[$dateFormatted]['occupiedSeats'];
+            }else  {
+                $bookingData[$dateFormatted]['freeSeats'] = $show['posti_reali'] - $bookingData[$dateFormatted]['occupiedSeats'];
+            }
             $bookingData[$dateFormatted]['bookings'] = isset($temp[$dateFormatted]['bookings']) ? $temp[$dateFormatted]['bookings'] : array();
         }
         return $bookingData;
@@ -172,7 +186,7 @@ class Booking {
                 . "LEFT JOIN users u ON u.id = p.id_user_ref "
                 . "WHERE p.id_spettacolo IN ($idArrays) "
                 . "ORDER BY u.name,p.nome");
-        $stmt->execute();
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 

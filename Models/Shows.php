@@ -25,7 +25,7 @@ class Shows {
                         filter_input(INPUT_POST, 'realseatsi'), 
                         filter_input(INPUT_POST, 'dayhoverbooki'),
                         filter_input(INPUT_POST, 'userid'),
-                        filter_input(INPUT_POST, 'companies')
+                        filter_input(INPUT_POST, 'company')
                         );
                 break;
             case 'd':
@@ -41,7 +41,7 @@ class Shows {
                     filter_input(INPUT_POST, 'seats'), 
                     filter_input(INPUT_POST, 'realseats'), 
                     filter_input(INPUT_POST, 'dayhoverbook'), 
-                    filter_input(INPUT_POST, 'companies')
+                    filter_input(INPUT_POST, 'company')
                 );
                 break;
             default:
@@ -89,15 +89,7 @@ class Shows {
             WHERE id=?");
         $name = trim($name);
         $stmt->bind_param("ssssiiii", $name, $location, $details, $convertedDate, $seats, $realSeats, $dayHoverbook, $id);
-        try{
-           return $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
     }
 
     function returnDataForSpettacoloId($id) {
@@ -106,15 +98,7 @@ class Shows {
                 . "JOIN theatre_companies tc ON s.company_id = tc.id "
                 . "WHERE s.id = ?");
         $stmt->bind_param("s", $id);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
         $r = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $r = count($r) == 0 ? null : $r[0];
         return $r;
@@ -127,15 +111,7 @@ class Shows {
                 . "AND us.show_id = ? "
                 . "AND u.access_level != 0");
         $stmt->bind_param("i", $user['id']);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $c) {
             if ($c['count'] > 0) {
                 $r['erromessage'] = "Devi prima eliminare tutti gli utenti, tranne te, per eliminare uno spettacolo";
@@ -144,15 +120,7 @@ class Shows {
         }
         $stmt = $this->db->prepare("DELETE FROM spettacoli WHERE id=?");
         $stmt->bind_param("i", $id);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+       Database::executeQuery($stmt);
     }
 
     function insertShow($timestamp, $name, $location, $details, $seats, $realSeats, $dayHoverbook, $userId, $companyId) {
@@ -176,44 +144,7 @@ class Shows {
                 . "VALUES (?,?,?,?,?,?,?,?)");
         $name = trim($name);
         $stmt->bind_param("ssissiii", $name, $location, $companyId, $details, $convertedDate, $seats, $realSeats, $dayHoverbook);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
-        $showId = $stmt->insert_id;
-        $stmt = $this->db->prepare("INSERT INTO users_shows (show_id, user_id) "
-                . "VALUES (?,?)");
-        $stmt->bind_param("ii", $showId, $userId);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
-
-        $stmt = $this->db->prepare("SELECT company_id FROM companies_users "
-                . "WHERE user_id = ? "
-                . "AND is_company_admin = 1");
-        $stmt->bind_param("i", $userId);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
-
-        $companyIdArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        Database::executeQuery($stmt);
     }
 
     function retriveAllfutureShow($userId) {
@@ -224,15 +155,21 @@ class Shows {
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
         $stmt->bind_param("i", $userId);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    function retriveAllfutureShowForCompanies($companyArray) {
+        $stmt = $this->db->prepare("SELECT s.* "
+                . "FROM spettacoli s "
+                . "JOIN theatre_companies tc ON tc.id = s.company_id "
+                . "WHERE data >= NOW() "
+                . "AND tc.id IN (?) "
+                . "ORDER BY data ASC");
+        $companyIds =  array_keys($companyArray);   
+        $inCondition = implode(',', $companyIds);
+        $stmt->bind_param("s", $inCondition);       
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -246,15 +183,7 @@ class Shows {
                 . "AND s.data >= NOW() "
                 . "ORDER BY data ASC");
         $stmt->bind_param("i", $userId);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -296,15 +225,7 @@ class Shows {
                 . "AND s.ID IN  (" . $inCondition . ") "
                 . "ORDER BY data ASC");
         $stmt->bind_param("s", $now);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -320,15 +241,7 @@ class Shows {
                 . "WHERE data >= ? "
                 . "ORDER BY `spettacoli`.`data` ASC");
         $stmt->bind_param("s", $today);
-        try{
-            $stmt->execute();
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
+        Database::executeQuery($stmt);
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
             $date = new DateTime($show['data']);
             $dayOfTheWeek = DateUtil::transformDay($date->format('N'));
@@ -346,15 +259,7 @@ class Shows {
                     . "AND us.user_id = ? "
                     . "ORDER BY data ASC");
             $stmt->bind_param("i", $user['id']);
-            try{
-                $stmt->execute();
-            }catch( mysqli_sql_exception $e ){
-                global $debug;
-                if($debug){
-                    echo $e->getMessage();
-                    die;
-                }
-            }
+            Database::executeQuery($stmt);
             foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $showId) {
                 $result[$user['id']][] = $showId['id'] . " ";
             }

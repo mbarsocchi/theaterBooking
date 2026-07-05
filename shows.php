@@ -11,16 +11,23 @@ $users = new Users();
 $thisUser = $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
 $companies = new Company();
 $loginData['isLogged'] = true;
-$loginData['isAdmin'] = $thisUser['access_level'] == 0;
-
-if ($loginData['isAdmin']) {
+$isSuperAdmin = $thisUser['access_level'] == 0;
+$atLeastOneCompanyAdmin = false;
+if(isset($thisUser['company'] )){
+    foreach ($thisUser['company'] as $company) {
+        if ($company['isCompanyAdmin'] == 1) {
+           $atLeastOneCompanyAdmin = true;
+        }
+    }
+}
+if ($isSuperAdmin) {
     $data['companies'] = $companies->getAllCompanies();
-} else if ($loginData['isCompanyAdmin']) {
+} else if ($isSuperAdmin ||$atLeastOneCompanyAdmin) {
     $data['companies'] = $companies->getallManagedCompany($thisUser['id']);
 }
 
 $iAmACompanyAdmin = count($data['companies'])>0;
-$loginData['isCompanyAdmin']= $iAmACompanyAdmin;
+$loginData['isAdmin']= $iAmACompanyAdmin;
 $data['isCompanyAdmin']= $iAmACompanyAdmin;
 $loginData['thispage'] = "shows";
 
@@ -40,7 +47,7 @@ if (filter_input(INPUT_GET, 'si') != null) {
 if (isset($r) && isset($r['erromessage'])) {
     $data['errors'] = $r['erromessage'];
 }
-$data['isAdmin'] = $thisUser['access_level'] == 0;
+$data['isAdmin'] = $isSuperAdmin;
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
 $data['futureShow'] = $shows->retriveAllfutureShowICanManage($thisUser['id']);

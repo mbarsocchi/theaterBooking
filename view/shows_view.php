@@ -49,15 +49,14 @@
                 <input type="text" name="realseatsi" placeholder="Numero posti reali" value= "">
             </div>
             <div class="foc">    
-                <input type="text" name="dayhoverbooki" placeholder="2" value= "2">
-                (numero di giorni prima della chiusura dell'hoverbook)
+                <input type="text" name="dayhoverbooki" placeholder="numero di giorni prima della chiusura dell'hoverbook" value= "">
             </div>
             <div class="foc">
             <h2 style="display: inline;">Compagnia:</h2>
             <?php
             $countCompanies = count($companies);
             if ($countCompanies > 1) {?>
-            <select id="companies" name="companies">
+            <select id="companies" name="company">
                 <option value=""></option>
                 <?php foreach ($companies as $companyId => $compData) {
                     ?>

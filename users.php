@@ -12,9 +12,18 @@ $comp = new Company();
 $shows = new Shows();
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
-$numberOfUsersInScope = count( $users->getUsersInScope($thisUser['id']));
+$numberOfUsersInScope = count($users->getUsersInScope($thisUser['id']));
 $loginData['isLogged'] = true;
-$loginData['isAdmin'] = $thisUser['access_level'] == 0;
+$isSuperAdmin = $thisUser['access_level'] == 0;
+$loginData['isAdmin'] = $isSuperAdmin;
+$atLeastOneCompanyAdmin = false;
+if(isset($thisUser['company'] )){
+    foreach ($thisUser['company'] as $company) {
+        if ($company['isCompanyAdmin'] == 1) {
+           $atLeastOneCompanyAdmin = true;
+        }
+    }
+}
 $loginData['isCompanyAdmin'] = $numberOfUsersInScope> 1;
 $loginData['thispage'] = "user";
 
@@ -54,14 +63,27 @@ if (filter_input(INPUT_GET, 'ui') != null &&
         in_array(filter_input(INPUT_GET, 'ui'), $usersIdInScope)) {
 
     $data['userToModify'] = $users->getUser(filter_input(INPUT_GET, 'ui'));
+    $data['futureShow'] =  $shows->retriveAllfutureShowForCompanies($data['userToModify']['company']);
     $data['userToModify']['company'] = $comp->companyDataForUsesAndCompany($data['companies'], $data['userToModify']['company']);
+}else {
+    if ($isSuperAdmin){
+        //die("che show dovrei far vedere come superadmin???");
+        $data['futureShow'] =[];
+    }else if ($atLeastOneCompanyAdmin) {
+        foreach ($data['companies'] as $compData) {
+            $rearangedCompanies[$compData['id']]= $compData['name'];
+        }
+        $data['futureShow'] =  $shows->retriveAllfutureShowForCompanies( $rearangedCompanies);
+    }else{
+        $data['futureShow'] =  $shows->retriveAllfutureShow($thisUser['id']);
+    }
 }
-$data['isAdmin'] = $thisUser['access_level'] == 0;
+$data['isAdmin'] = $isSuperAdmin;
 $data['isCompanyAdmin'] = $numberOfUsersInScope > 1;
 $data['userName'] = $thisUser['name'];
 $data['thisUserId'] = $thisUser['id'];
 $data['showUserMap'] = $shows->getShowInUserScope($data['usersInScope']);
-$data['futureShow'] = $shows->retriveAllfutureShow($thisUser['id']);
+
 
 $tmpl = new RenderTemplate(__DIR__ . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR . 'part_navmenu.php', $loginData);
 echo $tmpl->render();
