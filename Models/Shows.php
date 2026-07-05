@@ -89,7 +89,11 @@ class Shows {
             WHERE id=?");
         $name = trim($name);
         $stmt->bind_param("ssssiiii", $name, $location, $details, $convertedDate, $seats, $realSeats, $dayHoverbook, $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     function returnDataForSpettacoloId($id) {
@@ -98,7 +102,11 @@ class Shows {
                 . "JOIN theatre_companies tc ON s.company_id = tc.id "
                 . "WHERE s.id = ?");
         $stmt->bind_param("s", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $r = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $r = count($r) == 0 ? null : $r[0];
         return $r;
@@ -111,7 +119,11 @@ class Shows {
                 . "AND us.show_id = ? "
                 . "AND u.access_level != 0");
         $stmt->bind_param("i", $user['id']);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $c) {
             if ($c['count'] > 0) {
                 $r['erromessage'] = "Devi prima eliminare tutti gli utenti, tranne te, per eliminare uno spettacolo";
@@ -120,7 +132,15 @@ class Shows {
         }
         $stmt = $this->db->prepare("DELETE FROM spettacoli WHERE id=?");
         $stmt->bind_param("i", $id);
-       Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
+         if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
     }
 
     function insertShow($timestamp, $name, $location, $details, $seats, $realSeats, $dayHoverbook, $userId, $companyId) {
@@ -144,7 +164,11 @@ class Shows {
                 . "VALUES (?,?,?,?,?,?,?,?)");
         $name = trim($name);
         $stmt->bind_param("ssissiii", $name, $location, $companyId, $details, $convertedDate, $seats, $realSeats, $dayHoverbook);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     function retriveAllfutureShow($userId) {
@@ -155,21 +179,28 @@ class Shows {
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
         $stmt->bind_param("i", $userId);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     function retriveAllfutureShowForCompanies($companyArray) {
+        $companyIds =  array_keys($companyArray);
+        $inCondition = count($companyIds)> 0?  "AND tc.id IN (".implode(',', $companyIds).") ":"";
         $stmt = $this->db->prepare("SELECT s.* "
                 . "FROM spettacoli s "
                 . "JOIN theatre_companies tc ON tc.id = s.company_id "
                 . "WHERE data >= NOW() "
-                . "AND tc.id IN (?) "
-                . "ORDER BY data ASC");
-        $companyIds =  array_keys($companyArray);   
-        $inCondition = implode(',', $companyIds);
-        $stmt->bind_param("s", $inCondition);       
-        Database::executeQuery($stmt);
+                . $inCondition
+                . "ORDER BY data ASC"); 
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -183,7 +214,11 @@ class Shows {
                 . "AND s.data >= NOW() "
                 . "ORDER BY data ASC");
         $stmt->bind_param("i", $userId);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -225,7 +260,10 @@ class Shows {
                 . "AND s.ID IN  (" . $inCondition . ") "
                 . "ORDER BY data ASC");
         $stmt->bind_param("s", $now);
-        Database::executeQuery($stmt);
+                if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -241,7 +279,10 @@ class Shows {
                 . "WHERE data >= ? "
                 . "ORDER BY `spettacoli`.`data` ASC");
         $stmt->bind_param("s", $today);
-        Database::executeQuery($stmt);
+                if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
             $date = new DateTime($show['data']);
             $dayOfTheWeek = DateUtil::transformDay($date->format('N'));
@@ -259,7 +300,11 @@ class Shows {
                     . "AND us.user_id = ? "
                     . "ORDER BY data ASC");
             $stmt->bind_param("i", $user['id']);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            };
             foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $showId) {
                 $result[$user['id']][] = $showId['id'] . " ";
             }

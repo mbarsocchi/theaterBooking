@@ -24,10 +24,19 @@ if (filter_input(INPUT_POST, 'f') != null && in_array(filter_input(INPUT_POST, '
 $data['isAdmin'] = $thisUser['access_level'] == 0;
 $userCompanies = $users->getCompanyForUser($thisUser['id']);
 $data['companyICanAdmin'] = $userCompanies['adminArray'];
+$futureShows = $shows->retriveAllfutureShow($thisUser['id']);
 if ($data['isAdmin'] || count($userCompanies['adminArray']) > 0){
-    $futureShows = $shows->retriveAllfutureShowICanManage($thisUser['id']);
-}else {
-    $futureShows = $shows->retriveAllfutureShow($thisUser['id']);
+    $r= array_merge($futureShows, $shows->retriveAllfutureShowICanManage($thisUser['id']));
+    $showId= [];
+    foreach ($r as $key => $row) {
+        if (in_array($row['id'], $showId)) {
+            unset($r[$key]);
+            continue;
+        }else {
+            $showId[$key] = $row['id'];
+        }
+    }
+    $futureShows =$r;
 }
 $allUsersForShows = $shows->getAllUsersForShows($futureShows);
 

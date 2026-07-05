@@ -153,7 +153,7 @@ function subAddShow() {
         alert("Inserisci il numero di posti correttamente");
         return false;
     } else if (!hasAvailableSetUnSettled && !hasRealSetUnSettled) {
-        if ( seat > realseat) {
+        if ( seat < realseat) {
            alert("L'Hoverbooking deve essere maggiore o uguale al numero di posti reali");
            return false; 
         }

@@ -66,7 +66,11 @@ class Booking {
         if ($this->canIDeleteThisPreno($myUserId, $id)) {
             $stmt = $this->db->prepare("DELETE FROM prenotazioni WHERE id = ?");
             $stmt->bind_param("i", $id);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            };
         }
     }
 
@@ -107,12 +111,16 @@ class Booking {
 
     function insertPreno($name, $userId, $id) {
         $validate = $this->validateField($name);
+        $returnedMessage ="";
         if (isset($validate)) {
-            echo "<h2>" . $validate . "</h2>";
+            $returnedMessage .= "<h2>" . $validate . "</h2>";
         }
-        $stmt = $this->db->prepare("SELECT id,posti, posti_reali, hoverbook_giorni FROM spettacoli WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT id, posti, posti_reali, hoverbook_giorni, data FROM spettacoli WHERE id = ?");
         $stmt->bind_param("i", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            $returnedMessage .= "Error: " . $stmt->error;
+        };
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $show) {
             $idShow = $show['id'];
             if ($this->weAreAfterHoverBookPeriod($show['hoverbook_giorni'], $show['data'])) {
@@ -124,20 +132,27 @@ class Booking {
         }
         $stmt = $this->db->prepare("SELECT count(1) as count FROM prenotazioni WHERE id_spettacolo = ?");
         $stmt->bind_param("s", $idShow);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            $returnedMessage .= "Error: " . $stmt->error;
+        };
         $rows = $stmt->get_result()->fetch_assoc();
         $count = $rows['count'];
         $stmt->free_result();
         if ($count + 1 > $maxPosti) {
-            echo "non ci sono più posti";
+            $returnedMessage .= "non ci sono più posti";
         } else {
             $today = date(self::SQL_DATE_FORMAT);
             $stmt = $this->db->prepare("INSERT INTO prenotazioni (id_spettacolo, nome, id_user_ref, _ins) "
                     . "VALUES (?,?,?,?)");
             $name = trim($name);
             $stmt->bind_param("isis", $idShow, $name, $userId, $today);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                $returnedMessage .= "Error: " . $stmt->error;
+            };
         }
+        return $returnedMessage;
     }
 
     function getBookings($showDates) {
@@ -186,7 +201,11 @@ class Booking {
                 . "LEFT JOIN users u ON u.id = p.id_user_ref "
                 . "WHERE p.id_spettacolo IN ($idArrays) "
                 . "ORDER BY u.name,p.nome");
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 

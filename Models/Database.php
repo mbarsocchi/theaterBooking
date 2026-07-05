@@ -23,22 +23,5 @@ class Database {
         }
         return self::$conn;
     }
-
-    public static function executeQuery($stmt) {
-        global $debug;
-        try{
-            $stmt->execute();
-            if($stmt->errno && $debug){
-                echo "Error: " . $stmt->error;
-                die();
-            }
-        }catch( mysqli_sql_exception $e ){
-            global $debug;
-            if($debug){
-                echo $e->getMessage();
-                die;
-            }
-        }
-    }   
-
+    
 }

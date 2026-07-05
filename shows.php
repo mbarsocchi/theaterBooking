@@ -25,10 +25,11 @@ if ($isSuperAdmin) {
 } else if ($isSuperAdmin ||$atLeastOneCompanyAdmin) {
     $data['companies'] = $companies->getallManagedCompany($thisUser['id']);
 }
-
-$iAmACompanyAdmin = count($data['companies'])>0;
-$loginData['isAdmin']= $iAmACompanyAdmin;
-$data['isCompanyAdmin']= $iAmACompanyAdmin;
+$usersInScope = $users->getUsersInScope($thisUser['id']);
+$numberOfUsersInScope = count($usersInScope);
+$loginData['isCompanyAdmin'] = $numberOfUsersInScope > 1;
+$loginData['isAdmin']= $isSuperAdmin;
+$data['isCompanyAdmin']= $loginData['isCompanyAdmin'];
 $loginData['thispage'] = "shows";
 
 $shows = new Shows();

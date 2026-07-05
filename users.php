@@ -12,7 +12,8 @@ $comp = new Company();
 $shows = new Shows();
 
 $thisUser = $users->getUserFromLogin($_SESSION['session_user']);
-$numberOfUsersInScope = count($users->getUsersInScope($thisUser['id']));
+$usersInScope = $users->getUsersInScope($thisUser['id']);
+$numberOfUsersInScope = count($usersInScope);
 $loginData['isLogged'] = true;
 $isSuperAdmin = $thisUser['access_level'] == 0;
 $loginData['isAdmin'] = $isSuperAdmin;
@@ -24,7 +25,7 @@ if(isset($thisUser['company'] )){
         }
     }
 }
-$loginData['isCompanyAdmin'] = $numberOfUsersInScope> 1;
+$loginData['isCompanyAdmin'] = $numberOfUsersInScope > 1;
 $loginData['thispage'] = "user";
 
 if (filter_input(INPUT_POST, 'f') != null) {

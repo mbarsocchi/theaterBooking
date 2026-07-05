@@ -66,7 +66,11 @@ class Login {
         $token = hash('sha256', $authenticator);
         $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
         $stmt->bind_param("ssis", $selector, $token, $id, $expires);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     private function updateSession($id) {
@@ -77,7 +81,11 @@ class Login {
                 . "WHERE userid = ?");
         $expires = date('Y-m-d\TH:i:s', $expireTimestamp);
         $stmt->bind_param("si", $id, $expires);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $currentCookieValue = $_COOKIE['remember'];
         setcookie(
                 'remember',
@@ -96,7 +104,11 @@ class Login {
                 . "JOIN users u ON at.userid = u.id "
                 . "WHERE selector = ?");
         $stmt->bind_param("s", $selector);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $authTokenArray = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         if (!count($authTokenArray) && isset($_COOKIE['remember'])) {
             $this->exit();
@@ -115,7 +127,11 @@ class Login {
                 . "WHERE expires < ? "
                 . "LIMIT 5");
         $stmt->bind_param("s", $expireTimestamp);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     public function isAuth() {
@@ -138,8 +154,11 @@ class Login {
 
         $passwordHash = md5($password);
         $stmt->bind_param("ss", $username, $passwordHash);
-
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $result = null;
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $user) {
             $result['id'] = $user['id'];
@@ -160,7 +179,11 @@ class Login {
                     . "FROM auth_tokens "
                     . "WHERE selector = ?");
             $stmt->bind_param("s", $selector);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            };
         }
         header('Location: index.php');
         exit;

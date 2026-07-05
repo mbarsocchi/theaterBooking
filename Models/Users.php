@@ -39,7 +39,11 @@ class Users {
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE u.id = ?");
         $stmt->bind_param("i", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+         if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         if (count($queryResults) == 0) {
             $result = null;
@@ -66,7 +70,11 @@ class Users {
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "WHERE user_login = ?");
         $stmt->bind_param("s", $name);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+         if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $r['company'] = array();
         if (count($queryResults) == 0) {
@@ -88,7 +96,11 @@ class Users {
     function email_exists($email) {
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $result = $stmt->get_result();
         return $result->num_rows > 0;
     }
@@ -96,7 +108,11 @@ class Users {
     function store_reset_token($email, $token) {
         $stmt = $this->db->prepare("UPDATE users SET reset_token = ?, _updated_at=NOW() WHERE email = ?");
         $stmt->bind_param("ss", $token, $email);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     function send_reset_email($host, $email, $token) {
@@ -110,7 +126,11 @@ class Users {
     function validate_reset_token($token) {
         $stmt = $this->db->prepare("SELECT id FROM users WHERE reset_token = ? and _updated_at > DATE_SUB(NOW(), INTERVAL 4 MINUTE)");
         $stmt->bind_param("s", $token);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $result = $stmt->get_result();
         return $result->num_rows > 0;
     }
@@ -121,7 +141,11 @@ class Users {
                 . "LEFT JOIN companies_users cu ON cu.user_id = u.id "
                 . "LEFT JOIN theatre_companies tc ON tc.id = cu.company_id "
                 . "ORDER BY u.name ASC;");
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $queryResults = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $userUsedTemp = array();
         foreach ($queryResults as $user) {
@@ -147,9 +171,15 @@ class Users {
                 . "INNER JOIN companies_users cu2 ON cu2.company_id = cu.company_id "
                 . "JOIN users u ON u.id = cu2.user_id "
                 . "WHERE cu.user_id = ? "
-                . "AND cu.is_company_admin = 1;");
+                . "AND cu.is_company_admin = 1 "
+                . "GROUP by u.id "
+                . "ORDER by u.name ASC;");
         $stmt->bind_param("i", $userid);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
     
@@ -160,15 +190,19 @@ class Users {
             }
         }
         $implodedString = implode(',', $companiesIds);
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login, cu.company_id, cu.is_company_admin 
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.user_login
 FROM companies_users cu 
 JOIN users u ON u.id = cu.user_id 
 WHERE cu.company_id IN (" . $implodedString . ") 
+GROUP BY u.id
 ORDER BY u.name ASC;");
 
-        Database::executeQuery($stmt);
-        $returned = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        return $returned;
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     function isAdmin($id) {
@@ -176,7 +210,11 @@ ORDER BY u.name ASC;");
         $stmt = $this->db->prepare("SELECT access_level "
                 . "FROM users WHERE id = ?");
         $stmt->bind_param("i", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $queryResult = $stmt->get_result();
         if ($queryResult->num_rows > 0) {
             while ($row = $queryResult->fetch_assoc()) {
@@ -208,7 +246,11 @@ ORDER BY u.name ASC;");
         $user_login = trim($user_login);
         $email = trim($email);
         $stmt->bind_param("ssss", $name, $user_login, $email, $hash);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         if ($stmt->affected_rows == 0) {
             return "Errore, Utente non inserito: Login già esistente";
         }
@@ -218,7 +260,11 @@ ORDER BY u.name ASC;");
                     . "VALUES (?,?)");
             $si = intval($showId);
             $stmt->bind_param("ii", $si, $userId);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
         }
 
         foreach ($arrayOfcompany as $companyId) {
@@ -227,17 +273,29 @@ ORDER BY u.name ASC;");
             $stmt = $this->db->prepare("INSERT INTO companies_users (company_id, user_id, is_company_admin) "
                     . "VALUES (?,?,?)");
             $stmt->bind_param("iii", $ci, $userId, $companyAdminToInsert);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
         }
     }
 
     function deleteUser($id) {
         $stmt = $this->db->prepare("DELETE FROM companies_users WHERE user_id=?");
         $stmt->bind_param("i", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $stmt = $this->db->prepare("DELETE FROM users WHERE id=?");
         $stmt->bind_param("i", $id);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
 
     function updateUser($userId, $name, $user_login, $email, $passwordClear, $showsArray, $arrayOfiscompanyadmin, $isCompanyAdmin, $companyForThisUser) {
@@ -254,7 +312,11 @@ ORDER BY u.name ASC;");
                         . "VALUES (?,?,?)");
                 $ci = intval($companyId);
                 $stmt->bind_param("iii", $ci, $userId, $compAdmin);
-                Database::executeQuery($stmt);
+                $stmt->execute();
+                if($stmt->errno && $debug){
+                    echo "Error: " . $stmt->error;
+                    die();
+                };
             }
         }
 
@@ -266,7 +328,11 @@ ORDER BY u.name ASC;");
                         . "AND user_id = ? ");
                 $ci = intval($companyId);
                 $stmt->bind_param("ii", $ci, $userId);
-                Database::executeQuery($stmt);
+                $stmt->execute();
+                if($stmt->errno && $debug){
+                    echo "Error: " . $stmt->error;
+                    die();
+                }
             }
         }
 
@@ -284,7 +350,11 @@ ORDER BY u.name ASC;");
             WHERE id=?");
             $stmt->bind_param("sssi", $name, $user_login, $email, $userId);
         }
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         // add admin to company
         $toAddCompanyAdmin = array_unique(array_merge($currentCompaniesForUser['adminArray'], $arrayOfiscompanyadmin), SORT_REGULAR);
         foreach ($toAddCompanyAdmin as $theatre_company_id) {
@@ -293,7 +363,11 @@ ORDER BY u.name ASC;");
             WHERE user_id=? 
             AND company_id=?");
             $stmt->bind_param("ii", $userId, $theatre_company_id);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
         }
 
         // remove admin to company
@@ -304,7 +378,11 @@ ORDER BY u.name ASC;");
             WHERE user_id=? 
             AND company_id=?");
             $stmt->bind_param("ii", $userId, $theatre_company_id);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
         }
 
         $toAddArr = array_diff($showsArray, $currentShowsForUser);
@@ -313,7 +391,11 @@ ORDER BY u.name ASC;");
                     . "VALUES (?,?)");
             $si = intval($showId);
             $stmt->bind_param("ii", $si, $userId);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            };
         }
         $toDeleteArr = array_diff($currentShowsForUser, $showsArray);
         foreach ($toDeleteArr as $showId) {
@@ -322,7 +404,11 @@ ORDER BY u.name ASC;");
                     . "AND user_id = ?");
             $si = intval($showId);
             $stmt->bind_param("ii", $si, $userId);
-            Database::executeQuery($stmt);
+            $stmt->execute();
+            if($stmt->errno && $debug){
+                echo "Error: " . $stmt->error;
+                die();
+            }
         }
     }
 
@@ -330,7 +416,11 @@ ORDER BY u.name ASC;");
         $stmt = $this->db->prepare("UPDATE users SET password = ?, reset_token = NULL, _updated_at=NOW() WHERE reset_token = ?");
         $hash = md5($new_password);
         $stmt->bind_param("ss", $hash, $token);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
     }
     
     function getShowsForUser($userId) {
@@ -341,7 +431,11 @@ ORDER BY u.name ASC;");
                 . "AND us.user_id = ? "
                 . "ORDER BY data ASC");
         $stmt->bind_param("i", $userId);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $showId) {
             $result[] = $showId['id'];
         }
@@ -356,7 +450,11 @@ ORDER BY u.name ASC;");
                 . "WHERE cu.user_id = ? "
                 . "ORDER BY tc.name ASC");
         $stmt->bind_param("i", $userId);
-        Database::executeQuery($stmt);
+        $stmt->execute();
+        if($stmt->errno && $debug){
+            echo "Error: " . $stmt->error;
+            die();
+        };
         $result['adminArray'] = array();
         $result['nonAdminArray'] = array();
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $companyInfo) {
